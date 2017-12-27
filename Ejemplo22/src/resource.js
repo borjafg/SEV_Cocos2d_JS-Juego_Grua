@@ -1,7 +1,12 @@
 var res = {
     HelloWorld_png : "res/HelloWorld.png",
     CloseNormal_png : "res/CloseNormal.png",
-    CloseSelected_png : "res/CloseSelected.png"
+    CloseSelected_png : "res/CloseSelected.png",
+    barra_png : "res/barra_3.png",
+    barra_plist : "res/barra_3.plist",
+    fondo_menu_png : "res/fondo_menu.png",
+    fondo_game_png : "res/fondo_game.png",
+    boton_jugar_png : "res/boton_jugar.png"
 };
 
 var g_resources = [];
