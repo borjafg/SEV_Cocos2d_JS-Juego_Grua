@@ -87,13 +87,12 @@ var GameLayer = cc.Layer.extend({
                     instancia.spriteGrua.runAction(actionMoverGruaX);
            },
 
-           onKeyReleased: function(keyCode, event){
-               if(keyCode == 37 || keyCode == 39){
-                     var instancia = event.getCurrentTarget();
-                     cc.director.getActionManager().
-                       removeAllActionsFromTarget(instancia.spriteGrua, true);
-               }
-           }
+            onKeyReleased: function(keyCode, event){
+                if (keyCode == 37 || keyCode == 39) {
+                    var instancia = event.getCurrentTarget();
+                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
+                }
+            }
         }, this); // Fin del listener KEYBOARD
 
         // ----------------------------

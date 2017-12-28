@@ -23,7 +23,6 @@ var MenuLayer = cc.Layer.extend({
         new cc.Sprite(res.boton_jugar_png),
         this.pulsarBotonJugar, this);
 
-
         var menu = new cc.Menu(botonJugar);
 
         // Asigno posición central
@@ -34,7 +33,10 @@ var MenuLayer = cc.Layer.extend({
 
         return true;
 
-    }, pulsarBotonJugar : function(){
+    },
+
+
+    pulsarBotonJugar : function(){
         cc.director.runScene(new GameScene());
     }
 
