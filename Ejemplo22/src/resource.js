@@ -6,7 +6,9 @@ var res = {
     barra_plist : "res/barra_3.plist",
     fondo_menu_png : "res/fondo_menu.png",
     fondo_game_png : "res/fondo_game.png",
-    boton_jugar_png : "res/boton_jugar.png"
+    boton_jugar_png : "res/boton_jugar.png",
+    grua_png : "res/grua.png",
+    joypad_png : "res/joypad.png"
 };
 
 var g_resources = [];

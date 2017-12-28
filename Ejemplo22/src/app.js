@@ -35,18 +35,11 @@ var MenuLayer = cc.Layer.extend({
         return true;
 
     }, pulsarBotonJugar : function(){
-               cc.director.runScene(new GameScene());
+        cc.director.runScene(new GameScene());
     }
 
 });
 
-var GameScene = cc.Scene.extend({
-    onEnter:function () {
-        this._super();
-        var layer = new GameLayer();
-        this.addChild(layer);
-    }
-});
 
 
 var MenuScene = cc.Scene.extend({
