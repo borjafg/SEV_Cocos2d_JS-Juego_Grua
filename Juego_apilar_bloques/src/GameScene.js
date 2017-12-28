@@ -125,7 +125,7 @@ var GameLayer = cc.Layer.extend({
                 var actionMoverGruaX = null;
                 var instancia = event.getCurrentTarget();
 
-                if (estadoJuego == AGARRAR_BLOQUE) {
+                //if (estadoJuego == AGARRAR_BLOQUE) {
                     if (keyCode == 37) {
                         console.log("Ir izquierda ");
 
@@ -139,7 +139,8 @@ var GameLayer = cc.Layer.extend({
                         instancia.grua_moverIzquierda = false;
                         instancia.grua_moverDerecha = true;
                     }
-                }
+                    cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
+                //}
             },
 
             onKeyReleased: function(keyCode, event){
@@ -163,7 +164,7 @@ var GameLayer = cc.Layer.extend({
 
 
     procesarMouseDown: function(event) {
-        if (estadoJuego == AGARRAR_BLOQUE) {
+        //if (estadoJuego == AGARRAR_BLOQUE) {
             var instancia = event.getCurrentTarget();
 
             var areaBotonIzda = instancia.botonIzda.getBoundingBox();
@@ -171,15 +172,15 @@ var GameLayer = cc.Layer.extend({
 
 
             if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                instancia.grua_moverIzquierda = true;
                 instancia.grua_moverDerecha = false;
+                instancia.grua_moverIzquierda = true;
             }
 
             else if (cc.rectContainsPoint( areaBotonDcha, cc.p(event.getLocationX(), event.getLocationY()) )) {
                 instancia.grua_moverIzquierda = false;
                 instancia.grua_moverDerecha = true;
             }
-        }
+        //}
     },
 
 
@@ -279,11 +280,10 @@ var GameLayer = cc.Layer.extend({
         // Movimiento de la grua
         // ---------------------------
 
-        cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
 
         if (this.grua_moverIzquierda) {
             var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - 0) / 500,
-                cc.p(Math.max(this.spriteGrua.x - 2, 0), cc.winSize.height * 0.9));
+                cc.p(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4), cc.winSize.height * 0.9));
 
             this.spriteGrua.runAction(actionMoverGruaX);
         }
