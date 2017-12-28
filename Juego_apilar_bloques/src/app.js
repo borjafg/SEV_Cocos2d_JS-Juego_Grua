@@ -1,11 +1,16 @@
-
+// ======================================
+// Capa de la escena
+// ======================================
 
 var MenuLayer = cc.Layer.extend({
-    ctor:function () {
+    ctor: function () {
         this._super();
         var size = cc.winSize;
 
-        // Fondo
+        // ---------------------------
+        // Crear el fondo
+        // ---------------------------
+
         var fondoMenu= new cc.Sprite(res.fondo_menu_png);
 
         // Asigno posición central
@@ -17,11 +22,12 @@ var MenuLayer = cc.Layer.extend({
         // Añado fondo a la escena
         this.addChild(fondoMenu);
 
-        //MenuItemSprite para el botón
-        var botonJugar = new cc.MenuItemSprite(
-        new cc.Sprite(res.boton_jugar_png),
-        new cc.Sprite(res.boton_jugar_png),
-        this.pulsarBotonJugar, this);
+        // -----------------------------------------------
+        // Crear el botón jugar. Será un MenuSpriteitem
+        // -----------------------------------------------
+
+        var botonJugar = new cc.MenuItemSprite(new cc.Sprite(res.boton_jugar_png),
+            new cc.Sprite(res.boton_jugar_png), this.pulsarBotonJugar, this);
 
         var menu = new cc.Menu(botonJugar);
 
@@ -32,17 +38,19 @@ var MenuLayer = cc.Layer.extend({
         this.addChild(menu);
 
         return true;
-
     },
 
 
-    pulsarBotonJugar : function(){
+    pulsarBotonJugar: function() {
         cc.director.runScene(new GameScene());
     }
 
 });
 
 
+// ==========================
+// Escena del juego
+// ==========================
 
 var MenuScene = cc.Scene.extend({
     onEnter:function () {
