@@ -20,7 +20,6 @@ var bloqueGenerar_Maximo = 15;
 var bloquesGenerar_actual = bloquesGenerar_inicial;
 var bloquesGenerar_incrementarUnidades = 5;
 
-
 // ------------------------------------------
 // Tipo de bloques que se pueden generar
 // ------------------------------------------
@@ -56,16 +55,22 @@ var tamanioPlataforma_incrementarCadaNiveles = 1;
 var nivelActual = 1;
 var nivelMaximo = 3;
 
-
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ======================================
 // Capa de la escena
 // ======================================
 
 var GameLayer = cc.Layer.extend({
     spriteGrua:null,
+    spritePlataformaGeneracion:null,
 
     botonDcha:null,
     botonIzda:null,
+    botonCoger:null,
+
+    bloqueGrua:null,
+    bloqueGenerado:null,
+    bloquesGenerados:null,
 
     grua_moverIzquierda:false,
     grua_moverDerecha:false,
@@ -79,13 +84,17 @@ var GameLayer = cc.Layer.extend({
         // -----------------------
 
         this.space = new cp.Space();
-        this.space.gravity = cp.v(0,0);
+        this.space.gravity = cp.v(0,-350);
 
         // --------------------------
         // Cachear los sprites
         // --------------------------
 
         cc.spriteFrameCache.addSpriteFrames(res.barra_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.animacioncocodrilo_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.barra2_plist);
+
+
 
         // --------------------
         // Crear el fondo
@@ -104,9 +113,11 @@ var GameLayer = cc.Layer.extend({
         // Inicializar elementos del juego
         // ----------------------------------
 
+        this.bloquesGenerados=0;
         this.inicializarPlataformas();
         this.inicializarGrua();
         this.inicializarBotonesControl();
+        this.generarBloqueAleatorio();
 
         // --------------------------
         // Añadir listeners
@@ -164,12 +175,12 @@ var GameLayer = cc.Layer.extend({
 
 
     procesarMouseDown: function(event) {
-        //if (estadoJuego == AGARRAR_BLOQUE) {
+        if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
             var instancia = event.getCurrentTarget();
 
             var areaBotonIzda = instancia.botonIzda.getBoundingBox();
             var areaBotonDcha = instancia.botonDcha.getBoundingBox();
-
+            var areaBotonCoger = instancia.botonCoger.getBoundingBox();
 
             if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
                 instancia.grua_moverDerecha = false;
@@ -180,9 +191,32 @@ var GameLayer = cc.Layer.extend({
                 instancia.grua_moverIzquierda = false;
                 instancia.grua_moverDerecha = true;
             }
-        //}
+
+            if(estadoJuego == AGARRAR_BLOQUE){
+                if  (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) ) && instancia.bloqueGenerado!=null)
+                {
+                    estadoJuego=AGARRANDO_BLOQUE;
+                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
+                    instancia.colocarGruaEncimaBloque();
+                    setTimeout(() => {instancia.agarrarBloque()}, 1500);
+                }
+            }
+        }
     },
 
+    moverGrua: function(x){
+
+        var actionMoverGruaX = cc.MoveTo.create(400 / 500,
+             cc.p(x, this.spriteGrua.y));
+
+        this.spriteGrua.runAction(actionMoverGruaX);
+
+        if(this.bloqueGrua!=null){
+            var actionMoverBloqueGruaX = cc.MoveTo.create(400 / 500,
+                cc.p(x, this.bloqueGrua.y));
+            this.bloqueGrua.runAction(actionMoverBloqueGruaX);
+        }
+    },
 
     procesarMouseUp: function(event) {
         var instancia = event.getCurrentTarget();
@@ -212,12 +246,36 @@ var GameLayer = cc.Layer.extend({
         this.botonDcha.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.25));
 
         this.addChild(this.botonDcha);
+
+        this.botonCoger = cc.Sprite.create(res.joypad_png);
+        this.botonCoger.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.45));
+
+        this.addChild(this.botonCoger);
     },
 
 
     generarBloqueAleatorio: function() {
-        var valorAleatorio = Math.floor(Math.random() * (baseParaGenerarBloques - 1)) + 1;
 
+        var spriteBloque = new cc.PhysicsSprite("#cocodrilo1.png");
+
+        console.log("1: " + spriteBloque.width + ", 2: " + spriteBloque.height);
+        // Masa 1
+        var body = new cp.Body(1, cp.momentForBox(1, 3, 3));
+
+        body.p = cc.p(this.spritePlataformaGeneracion.x , this.spritePlataformaGeneracion.y + this.spritePlataformaGeneracion.height + spriteBloque.height);
+
+        spriteBloque.setBody(body);
+        //this.space.addBody(body);
+
+        var shape = new cp.BoxShape(body, spriteBloque.width, spriteBloque.height);
+        shape.setFriction(1);
+        //shape.setCollisionType(tipoBloque);
+        this.space.addShape(shape);
+        this.addChild(spriteBloque);
+        this.bloqueGenerado= spriteBloque;
+
+        /**
+        var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
         if (valorAleatorio <= 5) { // Generar un cuadrado
             //var dn = new cc.DrawNode();
             //this.addChild(dn, 500);
@@ -248,6 +306,8 @@ var GameLayer = cc.Layer.extend({
         else { // En cualquier otro caso: generar un cuadrado
 
         }
+        **/
+        this.bloquesGenerados++;
     },
 
 
@@ -265,6 +325,24 @@ var GameLayer = cc.Layer.extend({
         this.space.addStaticShape(shape);
 
         this.addChild(spritePlataforma);
+
+        /*this.spritePlataformaGeneracion = new cc.PhysicsSprite("#barra_2.png");
+        var body = new cp.StaticBody();
+        body.p = cc.p(cc.winSize.width * 0.25, cc.winSize.height * 0.75);
+        this.spritePlataformaGeneracion.setBody(body);
+
+        var shape = new cp.BoxShape(body, this.spritePlataformaGeneracion.width, this.spritePlataformaGeneracion.height);
+
+        // addStaticShape en lugar de addShape
+        shape.setFriction(1);
+        this.space.addStaticShape(shape);
+        */
+
+        this.spritePlataformaGeneracion =cc.Sprite.create(res.barra2_png);
+
+        this.spritePlataformaGeneracion.setPosition(cc.p(cc.winSize.width * 0.13, cc.winSize.height * 0.75));
+
+        this.addChild(this.spritePlataformaGeneracion);
     },
 
 
@@ -274,28 +352,53 @@ var GameLayer = cc.Layer.extend({
         }
     },
 
+    colocarGruaEncimaBloque:  function(){
+        this.moverGrua(this.bloqueGenerado.x);
+    },
+
+    agarrarBloque:  function(){
+            this.bloqueGrua=this.bloqueGenerado;
+            this.bloqueGenerado=null;
+            this.moverGrua(cc.winSize.width * 0.5);
+            estadoJuego=SOLTAR_BLOQUE;
+    },
+
 
     update: function (dt) {
         // ---------------------------
         // Movimiento de la grua
         // ---------------------------
+        this.space.step(dt);
 
+        if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
+            if (this.grua_moverIzquierda) {
+                /*var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - 0) / 500,
+                    cc.p(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4), this.spriteGrua.y));
 
-        if (this.grua_moverIzquierda) {
-            var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - 0) / 500,
-                cc.p(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4), cc.winSize.height * 0.9));
+                this.spriteGrua.runAction(actionMoverGruaX);
+                if(this.bloqueGrua!=null){
+                    var actionMoverBloqueGruaX = cc.MoveTo.create(Math.abs(this.bloqueGrua.x - 0) / 500,
+                        cc.p(Math.max(this.bloqueGrua.x - 2, cc.winSize.height * 0.4), this.bloqueGrua.y));
+                    this.bloqueGrua.runAction(actionMoverBloqueGruaX);
+                }*/
+                this.moverGrua(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4));
+            }
 
-            this.spriteGrua.runAction(actionMoverGruaX);
+            if (this.grua_moverDerecha) {
+                this.moverGrua(Math.min(this.spriteGrua.x + 2, cc.winSize.width));
+                /*var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - cc.winSize.width) / 500,
+                    cc.p(Math.min(this.spriteGrua.x + 2, cc.winSize.width), this.spriteGrua.y));
+
+                this.spriteGrua.runAction(actionMoverGruaX);
+                if(this.bloqueGrua!=null){
+                    var actionMoverBloqueGruaX = cc.MoveTo.create(Math.abs(this.bloqueGrua.x - cc.winSize.width) / 500,
+                        cc.p(Math.min(this.bloqueGrua.x + 2, cc.winSize.width), this.bloqueGrua.y));
+                    this.bloqueGrua.runAction(actionMoverBloqueGruaX);
+                }*/
+            }
         }
 
-        if (this.grua_moverDerecha) {
-            var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - cc.winSize.width) / 500,
-                cc.p(Math.min(this.spriteGrua.x + 2, cc.winSize.width), cc.winSize.height * 0.9));
-
-            this.spriteGrua.runAction(actionMoverGruaX);
-        }
     }
-
 });
 
 
