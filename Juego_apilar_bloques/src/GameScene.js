@@ -61,6 +61,14 @@ var tamanioPlataforma_incrementarCadaNiveles = 1;
 var nivelActual = 1;
 var nivelMaximo = 3;
 
+// -------------------
+// Capas utilizadas
+// -------------------
+
+var idCapaJuego = 1;
+var idCapaControles = 2;
+
+
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // ======================================
 // Capa de la escena
@@ -73,14 +81,13 @@ var GameLayer = cc.Layer.extend({
     arrayBloques:[],
     formasEliminar: [],
 
-    botonDcha:null,
+    /*botonDcha:null,
     botonIzda:null,
     botonCoger:null,
-    botonSoltar:null,
+    botonSoltar:null,*/
 
     bloqueGrua:null,
     bloqueGenerado:null,
-    bloquesGenerados:null,
 
     grua_moverIzquierda:false,
     grua_moverDerecha:false,
@@ -152,53 +159,8 @@ var GameLayer = cc.Layer.extend({
         this.bloquesGenerados=0;
         this.inicializarPlataformas();
         this.inicializarGrua();
-        this.inicializarBotonesControl();
+        //this.inicializarBotonesControl();
         this.generarBloqueAleatorio();
-
-        // --------------------------
-        // Añadir listeners
-        // --------------------------
-
-        cc.eventManager.addListener({
-            event: cc.EventListener.MOUSE,
-            onMouseDown: this.procesarMouseDown,
-            onMouseUp: this.procesarMouseUp
-        }, this)
-
-
-        cc.eventManager.addListener({
-            event: cc.EventListener.KEYBOARD,
-            onKeyPressed: function(keyCode, event) {
-                var actionMoverGruaX = null;
-                var instancia = event.getCurrentTarget();
-
-                //if (estadoJuego == AGARRAR_BLOQUE) {
-                    if (keyCode == 37) {
-                        console.log("Ir izquierda ");
-
-                        instancia.grua_moverIzquierda = true;
-                        instancia.grua_moverDerecha = false;
-                    }
-
-                    if (keyCode == 39) {
-                        console.log("Ir derecha ");
-
-                        instancia.grua_moverIzquierda = false;
-                        instancia.grua_moverDerecha = true;
-                    }
-                    cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
-                //}
-            },
-
-            onKeyReleased: function(keyCode, event){
-                if (keyCode == 37 || keyCode == 39) {
-                    var instancia = event.getCurrentTarget();
-
-                    instancia.grua_moverIzquierda = false;
-                    instancia.grua_moverDerecha = false;
-                }
-            }
-        }, this); // Fin del listener KEYBOARD
 
         // ----------------------------
         // Actualizar el juego
@@ -209,73 +171,6 @@ var GameLayer = cc.Layer.extend({
         return true;
     },
 
-
-    procesarMouseDown: function(event) {
-        if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
-            var instancia = event.getCurrentTarget();
-
-            var areaBotonIzda = instancia.botonIzda.getBoundingBox();
-            var areaBotonDcha = instancia.botonDcha.getBoundingBox();
-            var areaBotonCoger = instancia.botonCoger.getBoundingBox();
-            var areaBotonSoltar = instancia.botonSoltar.getBoundingBox();
-
-            if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                instancia.grua_moverDerecha = false;
-                instancia.grua_moverIzquierda = true;
-            }
-
-            else if (cc.rectContainsPoint( areaBotonDcha, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                instancia.grua_moverIzquierda = false;
-                instancia.grua_moverDerecha = true;
-            }
-
-            if(estadoJuego == AGARRAR_BLOQUE){
-                if  (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) ) && instancia.bloqueGenerado!=null)
-                {
-                    estadoJuego=AGARRANDO_BLOQUE;
-                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
-                    instancia.colocarGruaEncimaBloque();
-                    setTimeout(() => {instancia.agarrarBloque();}, 1500);
-
-                }
-            }
-            if(estadoJuego == SOLTAR_BLOQUE){
-                if  (cc.rectContainsPoint( areaBotonSoltar, cc.p(event.getLocationX(), event.getLocationY()) ) && instancia.bloqueGrua!=null)
-                {
-                    estadoJuego=SOLTANDO_BLOQUE;
-                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
-                    instancia.arrayBloques.push(instancia.bloqueGrua);
-                    var body = instancia.bloqueGrua.getBody();
-                    instancia.bloqueGrua=null;
-                    instancia.space.addBody(body);
-                    setTimeout(() => {instancia.generarBloqueAleatorio(); estadoJuego=AGARRAR_BLOQUE;}, 4000);
-                }
-            }
-        }
-    },
-
-    moverGrua: function(x){
-
-        var actionMoverGruaX = cc.MoveTo.create(400 / 500,
-             cc.p(x, this.spriteGrua.y));
-
-        this.spriteGrua.runAction(actionMoverGruaX);
-
-        if(this.bloqueGrua!=null){
-            var actionMoverBloqueGruaX = cc.MoveTo.create(400 / 500,
-                cc.p(x, this.bloqueGrua.y));
-            this.bloqueGrua.runAction(actionMoverBloqueGruaX);
-        }
-    },
-
-    procesarMouseUp: function(event) {
-        var instancia = event.getCurrentTarget();
-
-        instancia.grua_moverIzquierda = false;
-        instancia.grua_moverDerecha = false;
-    },
-
-
     inicializarGrua: function() {
         this.spriteGrua = cc.Sprite.create(res.grua_png);
 
@@ -285,32 +180,29 @@ var GameLayer = cc.Layer.extend({
         this.addChild(this.spriteGrua);
     },
 
+    inicializarPlataformas: function() {
+        var spritePlataforma = new cc.PhysicsSprite("#barra_" + tamanioPlataforma + ".png");
 
-    inicializarBotonesControl: function() {
-        this.botonIzda = cc.Sprite.create(res.joypad_png);
-        this.botonIzda.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.25));
+        var body = new cp.StaticBody();
+        body.p = cc.p(cc.winSize.width * 0.5, cc.winSize.height * 0.05);
+        spritePlataforma.setBody(body);
 
-        this.addChild(this.botonIzda);
+        var shape = new cp.BoxShape(body, spritePlataforma.width, spritePlataforma.height);
 
-        this.botonDcha = cc.Sprite.create(res.joypad_png);
-        this.botonDcha.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.25));
+        shape.setFriction(1);
+        this.space.addStaticShape(shape);
 
-        this.addChild(this.botonDcha);
+        this.addChild(spritePlataforma);
 
-        this.botonCoger = cc.Sprite.create(res.joypad_png);
-        this.botonCoger.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.45));
 
-        this.addChild(this.botonCoger);
+        this.spritePlataformaGeneracion =cc.Sprite.create(res.barra2_png);
 
-        this.botonSoltar = cc.Sprite.create(res.joypad_png);
-        this.botonSoltar.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.45));
+        this.spritePlataformaGeneracion.setPosition(cc.p(cc.winSize.width * 0.13, cc.winSize.height * 0.75));
 
-        this.addChild(this.botonSoltar);
+        this.addChild(this.spritePlataformaGeneracion);
     },
 
-
     generarBloqueAleatorio: function() {
-
         var spriteBloque = new cc.PhysicsSprite("#cocodrilo1.png");
 
         console.log("1: " + spriteBloque.width + ", 2: " + spriteBloque.height);
@@ -328,7 +220,6 @@ var GameLayer = cc.Layer.extend({
         this.space.addShape(shape);
         this.addChild(spriteBloque);
         this.bloqueGenerado= spriteBloque;
-
         /**
         var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
         if (valorAleatorio <= 5) { // Generar un cuadrado
@@ -365,29 +256,19 @@ var GameLayer = cc.Layer.extend({
         this.bloquesGenerados++;
     },
 
+    moverGrua: function(x){
 
-    inicializarPlataformas: function() {
-        var spritePlataforma = new cc.PhysicsSprite("#barra_" + tamanioPlataforma + ".png");
+        var actionMoverGruaX = cc.MoveTo.create(400 / 500,
+             cc.p(x, this.spriteGrua.y));
 
-        var body = new cp.StaticBody();
-        body.p = cc.p(cc.winSize.width * 0.5, cc.winSize.height * 0.05);
-        spritePlataforma.setBody(body);
+        this.spriteGrua.runAction(actionMoverGruaX);
 
-        var shape = new cp.BoxShape(body, spritePlataforma.width, spritePlataforma.height);
-
-        shape.setFriction(1);
-        this.space.addStaticShape(shape);
-
-        this.addChild(spritePlataforma);
-
-
-        this.spritePlataformaGeneracion =cc.Sprite.create(res.barra2_png);
-
-        this.spritePlataformaGeneracion.setPosition(cc.p(cc.winSize.width * 0.13, cc.winSize.height * 0.75));
-
-        this.addChild(this.spritePlataformaGeneracion);
+        if(this.bloqueGrua!=null){
+            var actionMoverBloqueGruaX = cc.MoveTo.create(400 / 500,
+                cc.p(x, this.bloqueGrua.y));
+            this.bloqueGrua.runAction(actionMoverBloqueGruaX);
+        }
     },
-
 
     cambiarTamanioPlataforma: function(nuevoTamanio) {
         if(nuevoTamanio >= tamanioPlataforma_minimo && nuevoTamanio <= tamanioPlataforma_maximo) {
@@ -402,6 +283,7 @@ var GameLayer = cc.Layer.extend({
     agarrarBloque:  function(){
             this.bloqueGrua=this.bloqueGenerado;
             this.bloqueGenerado=null;
+
             this.moverGrua(cc.winSize.width * 0.5);
             estadoJuego=SOLTAR_BLOQUE;
     },
@@ -411,6 +293,12 @@ var GameLayer = cc.Layer.extend({
     // ---------------------------
 
     collisionBloqueConMuro:function (arbiter, space) {
+        var controles = this.getParent().getChildByTag(idCapaControles);
+
+        if(controles.restarVida() == 0){
+            cc.director.runScene(new GameScene());
+        }
+
         var shapes = arbiter.getShapes();
         // shapes[0] es el muro
         this.formasEliminar.push(shapes[1]);
@@ -446,10 +334,11 @@ var GameLayer = cc.Layer.extend({
                    this.space.removeBody(shape.getBody());
                    this.arrayBloques[i].removeFromParent();
                    this.arrayBloques.splice(i, 1);
-                   //this.vidas--;
                 }
             }
         }
+
+        this.formasEliminar = [];
     }
 });
 
@@ -464,6 +353,9 @@ var GameScene = cc.Scene.extend({
         cc.director.resume();
 
         var layer = new GameLayer();
-        this.addChild(layer);
+        this.addChild(layer, 0, idCapaJuego);
+
+        var controlesLayer = new ControlesLayer();
+        this.addChild(controlesLayer, 0, idCapaControles);
     }
 });
