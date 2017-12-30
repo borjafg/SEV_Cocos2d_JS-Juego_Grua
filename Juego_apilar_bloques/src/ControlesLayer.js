@@ -1,4 +1,5 @@
 var ControlesLayer = cc.Layer.extend({
+
     vidas:3,
     etiquetaVidas:null,
 
@@ -55,7 +56,7 @@ var ControlesLayer = cc.Layer.extend({
                 //}
             },
 
-            onKeyReleased: function(keyCode, event){
+            onKeyReleased: function(keyCode, event) {
                 if (keyCode == 37 || keyCode == 39) {
                     var instancia = event.getCurrentTarget();
 
@@ -70,27 +71,45 @@ var ControlesLayer = cc.Layer.extend({
         return true;
     },
 
+
     inicializarBotonesControl: function() {
-        this.botonIzda = cc.Sprite.create(res.joypad_png);
+        // --------------------------------------
+        // Botón mover la grúa a la izquierda
+        // --------------------------------------
+
+        this.botonIzda = cc.Sprite.create(res.joypad_left_png);
         this.botonIzda.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.25));
 
         this.addChild(this.botonIzda);
 
-        this.botonDcha = cc.Sprite.create(res.joypad_png);
+        // --------------------------------------
+        // Botón mover la grúa a la derecha
+        // --------------------------------------
+
+        this.botonDcha = cc.Sprite.create(res.joypad_right_png);
         this.botonDcha.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.25));
 
         this.addChild(this.botonDcha);
 
-        this.botonCoger = cc.Sprite.create(res.joypad_png);
+        // --------------------------
+        // Botón agarrar bloque
+        // --------------------------
+
+        this.botonCoger = cc.Sprite.create(res.joypad_drag_drop_png);
         this.botonCoger.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.45));
 
         this.addChild(this.botonCoger);
+
+        // ------------------------
+        // Botón soltar bloque
+        // ------------------------
 
         this.botonSoltar = cc.Sprite.create(res.joypad_png);
         this.botonSoltar.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.45));
 
         this.addChild(this.botonSoltar);
     },
+
 
     procesarMouseDown: function(event) {
         if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
@@ -112,30 +131,46 @@ var ControlesLayer = cc.Layer.extend({
                 instancia.grua_moverDerecha = true;
             }
 
-            if(estadoJuego == AGARRAR_BLOQUE){
-                if  (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) ) && instancia.bloqueGenerado!=null)
-                {
-                    estadoJuego=AGARRANDO_BLOQUE;
+            if (estadoJuego == AGARRAR_BLOQUE) {
+                if (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) )
+                    && instancia.bloqueGenerado != null) {
+
+                    estadoJuego = AGARRANDO_BLOQUE;
+
                     cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
                     instancia.colocarGruaEncimaBloque();
-                    setTimeout(() => {instancia.agarrarBloque();}, 1500);
 
+                    setTimeout(() => {
+                            instancia.agarrarBloque();
+                        },
+                        1500);
                 }
             }
-            if(estadoJuego == SOLTAR_BLOQUE){
-                if  (cc.rectContainsPoint( areaBotonSoltar, cc.p(event.getLocationX(), event.getLocationY()) ) && instancia.bloqueGrua!=null)
-                {
-                    estadoJuego=SOLTANDO_BLOQUE;
+
+            else if (estadoJuego == SOLTAR_BLOQUE) {
+                if (cc.rectContainsPoint(areaBotonSoltar, cc.p(event.getLocationX(), event.getLocationY()))
+                    && instancia.bloqueGrua != null) {
+
+                    estadoJuego = SOLTANDO_BLOQUE;
+
                     cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
                     instancia.arrayBloques.push(instancia.bloqueGrua);
+
                     var body = instancia.bloqueGrua.getBody();
-                    instancia.bloqueGrua=null;
+
+                    instancia.bloqueGrua = null;
                     instancia.space.addBody(body);
-                    setTimeout(() => {instancia.generarBloqueAleatorio(); estadoJuego=AGARRAR_BLOQUE;}, 4000);
+
+                    setTimeout(() => {
+                            instancia.generarBloqueAleatorio();
+                            estadoJuego = AGARRAR_BLOQUE;
+                        },
+                        4000);
                 }
             }
-        }
+        }   // Fin
     },
+
 
     procesarMouseUp: function(event) {
         var instanciaCon = event.getCurrentTarget();
@@ -145,14 +180,18 @@ var ControlesLayer = cc.Layer.extend({
         instancia.grua_moverDerecha = false;
     },
 
-    restarVida:function(){
-         this.vidas--;
-         this.etiquetaVidas.setString("Vidas: " + this.vidas);
-         return this.vidas;
+
+    restarVida: function() {
+        this.vidas--;
+        this.etiquetaVidas.setString("Vidas: " + this.vidas);
+
+        return this.vidas;
     },
 
-    update:function (dt) {
+
+    update: function(dt) {
 
     }
 
 });
+
