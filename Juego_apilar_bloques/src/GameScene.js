@@ -9,6 +9,12 @@ var SOLTANDO_BLOQUE = 3;
 
 var estadoJuego = AGARRAR_BLOQUE;
 
+// ----------------------
+// Tipo de colisisones
+// ----------------------
+
+var tipoMuro = 2;
+var tipoBloque = 3;
 
 // -----------------------------------------------------
 // Número de bloques que hay que generar en un nivel
@@ -67,6 +73,7 @@ var GameLayer = cc.Layer.extend({
     botonDcha:null,
     botonIzda:null,
     botonCoger:null,
+    botonSoltar:null,
 
     bloqueGrua:null,
     bloqueGenerado:null,
@@ -181,6 +188,7 @@ var GameLayer = cc.Layer.extend({
             var areaBotonIzda = instancia.botonIzda.getBoundingBox();
             var areaBotonDcha = instancia.botonDcha.getBoundingBox();
             var areaBotonCoger = instancia.botonCoger.getBoundingBox();
+            var areaBotonSoltar = instancia.botonSoltar.getBoundingBox();
 
             if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
                 instancia.grua_moverDerecha = false;
@@ -198,7 +206,17 @@ var GameLayer = cc.Layer.extend({
                     estadoJuego=AGARRANDO_BLOQUE;
                     cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
                     instancia.colocarGruaEncimaBloque();
-                    setTimeout(() => {instancia.agarrarBloque()}, 1500);
+                    setTimeout(() => {instancia.agarrarBloque();}, 1500);
+
+                }
+            }
+            if(estadoJuego == SOLTAR_BLOQUE){
+                if  (cc.rectContainsPoint( areaBotonSoltar, cc.p(event.getLocationX(), event.getLocationY()) ) && instancia.bloqueGrua!=null)
+                {
+                    estadoJuego=SOLTANDO_BLOQUE;
+                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
+                    var body = instancia.bloqueGrua.getBody();
+                    instancia.space.addBody(body);
                 }
             }
         }
@@ -251,6 +269,11 @@ var GameLayer = cc.Layer.extend({
         this.botonCoger.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.45));
 
         this.addChild(this.botonCoger);
+
+        this.botonSoltar = cc.Sprite.create(res.joypad_png);
+        this.botonSoltar.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.45));
+
+        this.addChild(this.botonSoltar);
     },
 
 
