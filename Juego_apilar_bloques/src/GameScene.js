@@ -70,6 +70,9 @@ var GameLayer = cc.Layer.extend({
     spriteGrua:null,
     spritePlataformaGeneracion:null,
 
+    arrayBloques:[],
+    formasEliminar: [],
+
     botonDcha:null,
     botonIzda:null,
     botonCoger:null,
@@ -115,6 +118,32 @@ var GameLayer = cc.Layer.extend({
 
         // Añado fondo a la escena
         this.addChild(fondoGame);
+
+
+        // Muros
+        var muroIzquierda = new cp.SegmentShape(this.space.staticBody,
+            cp.v(0, 0),// Punto de Inicio
+            cp.v(0, size.height),// Punto final
+            10);// Ancho del muro
+        this.space.addStaticShape(muroIzquierda);
+
+        var muroDerecha = new cp.SegmentShape(this.space.staticBody,
+            cp.v(size.width, 0),// Punto de Inicio
+            cp.v(size.width, size.height),// Punto final
+            10);// Ancho del muro
+        this.space.addStaticShape(muroDerecha);
+
+        var muroAbajo = new cp.SegmentShape(this.space.staticBody,
+            cp.v(0, 0),// Punto de Inicio
+            cp.v(size.width, 0),// Punto final
+            10);// Ancho del muro
+        muroAbajo.setFriction(1);
+        muroAbajo.setCollisionType(tipoMuro);
+        this.space.addStaticShape(muroAbajo);
+
+
+        // muro y bloque
+        this.space.addCollisionHandler(tipoMuro, tipoBloque, null, null, this.collisionBloqueConMuro.bind(this), null);
 
         // ----------------------------------
         // Inicializar elementos del juego
@@ -215,8 +244,11 @@ var GameLayer = cc.Layer.extend({
                 {
                     estadoJuego=SOLTANDO_BLOQUE;
                     cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
+                    instancia.arrayBloques.push(instancia.bloqueGrua);
                     var body = instancia.bloqueGrua.getBody();
+                    instancia.bloqueGrua=null;
                     instancia.space.addBody(body);
+                    setTimeout(() => {instancia.generarBloqueAleatorio(); estadoJuego=AGARRAR_BLOQUE;}, 4000);
                 }
             }
         }
@@ -283,16 +315,16 @@ var GameLayer = cc.Layer.extend({
 
         console.log("1: " + spriteBloque.width + ", 2: " + spriteBloque.height);
         // Masa 1
-        var body = new cp.Body(1, cp.momentForBox(1, 3, 3));
+        var body = new cp.Body(1, cp.momentForBox(1, spriteBloque.width, spriteBloque.height));
 
-        body.p = cc.p(this.spritePlataformaGeneracion.x , this.spritePlataformaGeneracion.y + this.spritePlataformaGeneracion.height + spriteBloque.height);
+        body.p = cc.p(this.spritePlataformaGeneracion.x , this.spritePlataformaGeneracion.y + this.spritePlataformaGeneracion.height/2 + spriteBloque.height/2);
 
         spriteBloque.setBody(body);
         //this.space.addBody(body);
 
         var shape = new cp.BoxShape(body, spriteBloque.width, spriteBloque.height);
         shape.setFriction(1);
-        //shape.setCollisionType(tipoBloque);
+        shape.setCollisionType(tipoBloque);
         this.space.addShape(shape);
         this.addChild(spriteBloque);
         this.bloqueGenerado= spriteBloque;
@@ -343,23 +375,11 @@ var GameLayer = cc.Layer.extend({
 
         var shape = new cp.BoxShape(body, spritePlataforma.width, spritePlataforma.height);
 
-        // addStaticShape en lugar de addShape
         shape.setFriction(1);
         this.space.addStaticShape(shape);
 
         this.addChild(spritePlataforma);
 
-        /*this.spritePlataformaGeneracion = new cc.PhysicsSprite("#barra_2.png");
-        var body = new cp.StaticBody();
-        body.p = cc.p(cc.winSize.width * 0.25, cc.winSize.height * 0.75);
-        this.spritePlataformaGeneracion.setBody(body);
-
-        var shape = new cp.BoxShape(body, this.spritePlataformaGeneracion.width, this.spritePlataformaGeneracion.height);
-
-        // addStaticShape en lugar de addShape
-        shape.setFriction(1);
-        this.space.addStaticShape(shape);
-        */
 
         this.spritePlataformaGeneracion =cc.Sprite.create(res.barra2_png);
 
@@ -386,6 +406,16 @@ var GameLayer = cc.Layer.extend({
             estadoJuego=SOLTAR_BLOQUE;
     },
 
+    // ---------------------------
+    // Colisiones de bloques
+    // ---------------------------
+
+    collisionBloqueConMuro:function (arbiter, space) {
+        var shapes = arbiter.getShapes();
+        // shapes[0] es el muro
+        this.formasEliminar.push(shapes[1]);
+    },
+
 
     update: function (dt) {
         // ---------------------------
@@ -395,32 +425,31 @@ var GameLayer = cc.Layer.extend({
 
         if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
             if (this.grua_moverIzquierda) {
-                /*var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - 0) / 500,
-                    cc.p(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4), this.spriteGrua.y));
-
-                this.spriteGrua.runAction(actionMoverGruaX);
-                if(this.bloqueGrua!=null){
-                    var actionMoverBloqueGruaX = cc.MoveTo.create(Math.abs(this.bloqueGrua.x - 0) / 500,
-                        cc.p(Math.max(this.bloqueGrua.x - 2, cc.winSize.height * 0.4), this.bloqueGrua.y));
-                    this.bloqueGrua.runAction(actionMoverBloqueGruaX);
-                }*/
                 this.moverGrua(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4));
             }
 
             if (this.grua_moverDerecha) {
                 this.moverGrua(Math.min(this.spriteGrua.x + 2, cc.winSize.width));
-                /*var actionMoverGruaX = cc.MoveTo.create(Math.abs(this.spriteGrua.x - cc.winSize.width) / 500,
-                    cc.p(Math.min(this.spriteGrua.x + 2, cc.winSize.width), this.spriteGrua.y));
-
-                this.spriteGrua.runAction(actionMoverGruaX);
-                if(this.bloqueGrua!=null){
-                    var actionMoverBloqueGruaX = cc.MoveTo.create(Math.abs(this.bloqueGrua.x - cc.winSize.width) / 500,
-                        cc.p(Math.min(this.bloqueGrua.x + 2, cc.winSize.width), this.bloqueGrua.y));
-                    this.bloqueGrua.runAction(actionMoverBloqueGruaX);
-                }*/
             }
         }
 
+        // ---------------------------
+        // Eliminacion de bloques
+        // ---------------------------
+
+        // se buscan las formas que han caido fuera , para eliminarlas
+        for(var i = 0; i < this.formasEliminar.length; i++) {
+        var shape = this.formasEliminar[i];
+            for (var i = 0; i < this.arrayBloques.length; i++) {
+                if (this.arrayBloques[i].body.shapeList[0] == shape) {
+                   this.space.removeShape(shape);
+                   this.space.removeBody(shape.getBody());
+                   this.arrayBloques[i].removeFromParent();
+                   this.arrayBloques.splice(i, 1);
+                   //this.vidas--;
+                }
+            }
+        }
     }
 });
 

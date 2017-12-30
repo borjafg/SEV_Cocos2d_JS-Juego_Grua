@@ -19,6 +19,7 @@ var res = {
     joypad_png : "res/joypad.png",
 
     cocodrilo_1_png : "res/cocodrilo_1.png",
+    animacioncocodrilo_png : "res/animacioncocodrilo.png",
     animacioncocodrilo_plist : "res/animacioncocodrilo.plist"
 };
 
