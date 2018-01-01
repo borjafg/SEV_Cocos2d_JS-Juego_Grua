@@ -35,10 +35,10 @@ var ControlesLayer = cc.Layer.extend({
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
             onKeyPressed: function(keyCode, event) {
-                var actionMoverGruaX = null;
-                var instancia = event.getCurrentTarget();
+                var instanciaCon = event.getCurrentTarget();
+                var instancia = instanciaCon.getParent().getChildByTag(idCapaJuego);
 
-                //if (estadoJuego == AGARRAR_BLOQUE) {
+                if (estadoJuego == SOLTAR_BLOQUE) {
                     if (keyCode == 37) {
                         console.log("Ir izquierda ");
 
@@ -52,13 +52,15 @@ var ControlesLayer = cc.Layer.extend({
                         instancia.grua_moverIzquierda = false;
                         instancia.grua_moverDerecha = true;
                     }
-                    cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
-                //}
+                }
+
+                //cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
             },
 
             onKeyReleased: function(keyCode, event) {
                 if (keyCode == 37 || keyCode == 39) {
-                    var instancia = event.getCurrentTarget();
+                    var instanciaCon = event.getCurrentTarget();
+                    var instancia = instanciaCon.getParent().getChildByTag(idCapaJuego);
 
                     instancia.grua_moverIzquierda = false;
                     instancia.grua_moverDerecha = false;
@@ -121,16 +123,6 @@ var ControlesLayer = cc.Layer.extend({
             var areaBotonCoger = instanciaCon.botonCoger.getBoundingBox();
             var areaBotonSoltar = instanciaCon.botonSoltar.getBoundingBox();
 
-            if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                instancia.grua_moverDerecha = false;
-                instancia.grua_moverIzquierda = true;
-            }
-
-            else if (cc.rectContainsPoint( areaBotonDcha, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                instancia.grua_moverIzquierda = false;
-                instancia.grua_moverDerecha = true;
-            }
-
             if (estadoJuego == AGARRAR_BLOQUE) {
                 if (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) )
                     && instancia.bloqueGenerado != null) {
@@ -167,8 +159,19 @@ var ControlesLayer = cc.Layer.extend({
                         },
                         4000);
                 }
-            }
-        }   // Fin
+
+                else if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
+                    instancia.grua_moverDerecha = false;
+                    instancia.grua_moverIzquierda = true;
+                }
+
+                else if (cc.rectContainsPoint( areaBotonDcha, cc.p(event.getLocationX(), event.getLocationY()) )) {
+                    instancia.grua_moverIzquierda = false;
+                    instancia.grua_moverDerecha = true;
+                }
+            }   // Fin del estado == SOLTAR_BLOQUE
+
+        }   // Fin del if  estado == AGARRAR_BLOQUE || estaodo == SOLTAR_BLOQUE
     },
 
 
