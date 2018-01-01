@@ -75,6 +75,9 @@ var idCapaControles = 2;
 // ======================================
 
 var GameLayer = cc.Layer.extend({
+
+    space: null,
+
     spriteGrua: null,
     spritePlataformaGeneracion: null,
 
@@ -98,13 +101,18 @@ var GameLayer = cc.Layer.extend({
         this.space = new cp.Space();
         this.space.gravity = cp.v(0,-350);
 
+        // ---------------
+        // Depuración
+        // ---------------
+
+        this.depuracion = new cc.PhysicsDebugNode(this.space);
+        this.addChild(this.depuracion, 10);
+
         // --------------------------
         // Cachear los sprites
         // --------------------------
 
-        cc.spriteFrameCache.addSpriteFrames(res.barra_plist);
         cc.spriteFrameCache.addSpriteFrames(res.animacioncocodrilo_plist);
-        cc.spriteFrameCache.addSpriteFrames(res.barra2_plist);
 
         // --------------------
         // Crear el fondo
@@ -186,25 +194,39 @@ var GameLayer = cc.Layer.extend({
 
 
     inicializarPlataformas: function() {
-        var spritePlataforma = new cc.PhysicsSprite("#barra_" + tamanioPlataforma + ".png");
+        // ----------------------------------------
+        // Plataforma de colocación de bloques
+        // ----------------------------------------
+
+        var spritePlataforma = new cc.PhysicsSprite("res/barra_" + tamanioPlataforma + ".png");
 
         var body = new cp.StaticBody();
         body.p = cc.p(cc.winSize.width * 0.5, cc.winSize.height * 0.05);
         spritePlataforma.setBody(body);
 
         var shape = new cp.BoxShape(body, spritePlataforma.width, spritePlataforma.height);
-
         shape.setFriction(1);
         this.space.addStaticShape(shape);
 
         this.addChild(spritePlataforma);
 
+        // ----------------------------------------
+        // Plataforma de generación de bloques
+        // ----------------------------------------
 
-        this.spritePlataformaGeneracion =cc.Sprite.create(res.barra2_png);
+        var spritePlataformaGen = new cc.PhysicsSprite(res.barra2_png);
 
-        this.spritePlataformaGeneracion.setPosition(cc.p(cc.winSize.width * 0.13, cc.winSize.height * 0.75));
+        var body2 = new cp.StaticBody();
+        body2.p = cc.p(cc.winSize.width * 0.13, cc.winSize.height * 0.75);
+        spritePlataformaGen.setBody(body2);
 
-        this.addChild(this.spritePlataformaGeneracion);
+        var shape2 = new cp.BoxShape(body2, spritePlataformaGen.width, spritePlataformaGen.height);
+        shape2.setFriction(1);
+        this.space.addStaticShape(shape2);
+
+        this.addChild(spritePlataformaGen);
+
+        this.spritePlataformaGeneracion = spritePlataformaGen;
     },
 
 
@@ -266,12 +288,11 @@ var GameLayer = cc.Layer.extend({
 
 
     moverGrua: function(x) {
-        var actionMoverGruaX = cc.MoveTo.create(400 / 500, cc.p(x, this.spriteGrua.y));
-
+        var actionMoverGruaX = cc.MoveTo.create(4 / 5, cc.p(x, this.spriteGrua.y));
         this.spriteGrua.runAction(actionMoverGruaX);
 
         if(this.bloqueGrua != null) {
-            var actionMoverBloqueGruaX = cc.MoveTo.create(400 / 500, cc.p(x, this.bloqueGrua.y));
+            var actionMoverBloqueGruaX = cc.MoveTo.create(4 / 5, cc.p(x, this.bloqueGrua.y));
             this.bloqueGrua.runAction(actionMoverBloqueGruaX);
         }
     },
@@ -290,11 +311,11 @@ var GameLayer = cc.Layer.extend({
 
 
     agarrarBloque: function() {
-            this.bloqueGrua = this.bloqueGenerado;
-            this.bloqueGenerado = null;
+        this.bloqueGrua = this.bloqueGenerado;
+        this.bloqueGenerado = null;
 
-            this.moverGrua(cc.winSize.width * 0.5);
-            estadoJuego = SOLTAR_BLOQUE;
+        this.moverGrua(cc.winSize.width * 0.5);
+        estadoJuego = SOLTAR_BLOQUE;
     },
 
 
@@ -306,24 +327,30 @@ var GameLayer = cc.Layer.extend({
         }
 
         var shapes = arbiter.getShapes();
+
         // shapes[0] es el muro
         this.formasEliminar.push(shapes[1]);
     },
 
 
     update: function (dt) {
+        //cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
+        //cc.director.getActionManager().removeAllActionsFromTarget(this.bloqueGrua, true);
+
+
         // ---------------------------
         // Movimiento de la grua
         // ---------------------------
+
         this.space.step(dt);
 
         if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
             if (this.grua_moverIzquierda) {
-                this.moverGrua(Math.max(this.spriteGrua.x - 2, cc.winSize.height * 0.4));
+                this.moverGrua(Math.max(this.spriteGrua.x - 3, cc.winSize.height * 0.4));
             }
 
             if (this.grua_moverDerecha) {
-                this.moverGrua(Math.min(this.spriteGrua.x + 2, cc.winSize.width));
+                this.moverGrua(Math.min(this.spriteGrua.x + 3, cc.winSize.width));
             }
         }
 

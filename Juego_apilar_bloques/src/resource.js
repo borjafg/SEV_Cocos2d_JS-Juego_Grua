@@ -4,11 +4,9 @@ var res = {
     CloseNormal_png : "res/CloseNormal.png",
     CloseSelected_png : "res/CloseSelected.png",
 
-    barra_png : "res/barra_3.png",
-    barra_plist : "res/barra_3.plist",
-
+    barra1_png : "res/barra_1.png",
     barra2_png : "res/barra_2.png",
-    barra2_plist : "res/barra_2.plist",
+    barra3_png : "res/barra_3.png",
 
     fondo_menu_png : "res/fondo_menu.png",
     fondo_game_png : "res/fondo_game.png",

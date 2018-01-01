@@ -2,7 +2,7 @@
   "init_cfg": {
     "isLandscape": true,
     "isWindowTop": false,
-    "name": "Ejemplo2",
+    "name": "Juego_apilar_bloques",
     "width": 1136,
     "height": 640,
     "entry": "main.js",
