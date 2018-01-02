@@ -3,9 +3,10 @@
 // ----------------------
 
 var AGARRAR_BLOQUE = 0;
-var AGARRANDO_BLOQUE = 1
-var SOLTAR_BLOQUE = 2;
-var SOLTANDO_BLOQUE = 3;
+var AGARRANDO_BLOQUE = 1;
+var AGARRANDO_BLOQUE_VOLVER = 2;
+var SOLTAR_BLOQUE = 3;
+var SOLTANDO_BLOQUE = 4;
 
 var estadoJuego = AGARRAR_BLOQUE;
 
@@ -78,17 +79,19 @@ var GameLayer = cc.Layer.extend({
 
     space: null,
 
-    spriteGrua: null,
     spritePlataformaGeneracion: null,
+
+    spriteGrua: null,
+    spriteGrua_velX: 3,
 
     arrayBloques: [],
     formasEliminar: [],
 
-    bloqueGrua: null,
     bloqueGenerado: null,
 
     grua_moverIzquierda: false,
     grua_moverDerecha: false,
+
 
     ctor:function () {
         this._super();
@@ -183,6 +186,20 @@ var GameLayer = cc.Layer.extend({
     },
 
 
+    collisionBloqueConMuro: function(arbiter, space) {
+        var controles = this.getParent().getChildByTag(idCapaControles);
+
+        if(controles.restarVida() == 0) {
+            cc.director.runScene(new GameScene());
+        }
+
+        var shapes = arbiter.getShapes();
+
+        // shapes[0] es el muro
+        this.formasEliminar.push(shapes[1]);
+    },
+
+
     inicializarGrua: function() {
         this.spriteGrua = cc.Sprite.create(res.grua_png);
 
@@ -233,7 +250,8 @@ var GameLayer = cc.Layer.extend({
     generarBloqueAleatorio: function() {
         var spriteBloque = new cc.PhysicsSprite("#cocodrilo1.png");
 
-        console.log("1: " + spriteBloque.width + ", 2: " + spriteBloque.height);
+        console.log("Ancho: " + spriteBloque.width + ", Alto: " + spriteBloque.height);
+
         // Masa 1
         var body = new cp.Body(1, cp.momentForBox(1, spriteBloque.width, spriteBloque.height));
 
@@ -241,9 +259,9 @@ var GameLayer = cc.Layer.extend({
             this.spritePlataformaGeneracion.y + this.spritePlataformaGeneracion.height / 2 + spriteBloque.height / 2);
 
         spriteBloque.setBody(body);
-        //this.space.addBody(body);
 
         var shape = new cp.BoxShape(body, spriteBloque.width, spriteBloque.height);
+
         shape.setFriction(1);
         shape.setCollisionType(tipoBloque);
         this.space.addShape(shape);
@@ -287,17 +305,6 @@ var GameLayer = cc.Layer.extend({
     },
 
 
-    moverGrua: function(x) {
-        var actionMoverGruaX = cc.MoveTo.create(4 / 5, cc.p(x, this.spriteGrua.y));
-        this.spriteGrua.runAction(actionMoverGruaX);
-
-        if(this.bloqueGrua != null) {
-            var actionMoverBloqueGruaX = cc.MoveTo.create(4 / 5, cc.p(x, this.bloqueGrua.y));
-            this.bloqueGrua.runAction(actionMoverBloqueGruaX);
-        }
-    },
-
-
     cambiarTamanioPlataforma: function(nuevoTamanio) {
         if(nuevoTamanio >= tamanioPlataforma_minimo && nuevoTamanio <= tamanioPlataforma_maximo) {
             tamanioPlataforma = this.nuevoTamanio;
@@ -305,52 +312,95 @@ var GameLayer = cc.Layer.extend({
     },
 
 
-    colocarGruaEncimaBloque: function() {
-        this.moverGrua(this.bloqueGenerado.x);
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Mover la grua y el bloque generado
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    moverGrua: function(desplX) {
+        this.spriteGrua.setPosition(cc.p(this.spriteGrua.x + desplX, this.spriteGrua.y));
+    },
+
+    moverBloqueGenerado: function(desplX) {
+        this.bloqueGenerado.setPosition(cc.p(this.bloqueGenerado.x + desplX, this.bloqueGenerado.y));
     },
 
 
-    agarrarBloque: function() {
-        this.bloqueGrua = this.bloqueGenerado;
-        this.bloqueGenerado = null;
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Actualizar el juego
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        this.moverGrua(cc.winSize.width * 0.5);
-        estadoJuego = SOLTAR_BLOQUE;
-    },
-
-
-    collisionBloqueConMuro: function(arbiter, space) {
-        var controles = this.getParent().getChildByTag(idCapaControles);
-
-        if(controles.restarVida() == 0) {
-            cc.director.runScene(new GameScene());
-        }
-
-        var shapes = arbiter.getShapes();
-
-        // shapes[0] es el muro
-        this.formasEliminar.push(shapes[1]);
-    },
-
-
-    update: function (dt) {
-        //cc.director.getActionManager().removeAllActionsFromTarget(this.spriteGrua, true);
-        //cc.director.getActionManager().removeAllActionsFromTarget(this.bloqueGrua, true);
-
-
+    update: function(dt) {
         // ---------------------------
         // Movimiento de la grua
         // ---------------------------
 
         this.space.step(dt);
 
-        if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
+        if (estadoJuego == SOLTAR_BLOQUE) {
+            var desplX;
+
             if (this.grua_moverIzquierda) {
-                this.moverGrua(Math.max(this.spriteGrua.x - 3, cc.winSize.height * 0.4));
+                if (this.spriteGrua.x - this.spriteGrua_velX > cc.winSize.width * 0.3) {
+                    desplX = -this.spriteGrua_velX;
+
+                    this.moverGrua(desplX);
+                    this.moverBloqueGenerado(desplX);
+                }
+
+                else {
+                    desplX = cc.winSize.width * 0.3 - this.spriteGrua.x;
+
+                    this.moverGrua(desplX);
+                    this.moverBloqueGenerado(desplX);
+                }
             }
 
             if (this.grua_moverDerecha) {
-                this.moverGrua(Math.min(this.spriteGrua.x + 3, cc.winSize.width));
+                if (this.spriteGrua.x + this.spriteGrua_velX < cc.winSize.width * 0.9) {
+                    desplX = this.spriteGrua_velX;
+
+                    this.moverGrua(desplX);
+                    this.moverBloqueGenerado(desplX);
+                }
+
+                else {
+                    desplX = cc.winSize.width * 0.9 - this.spriteGrua.x;
+
+                    this.moverGrua(desplX);
+                    this.moverBloqueGenerado(desplX);
+                }
+            }
+        }
+
+        // --------------------------------------------------
+        // Colocar la grúa encima del bloque
+        // --------------------------------------------------
+
+        if (estadoJuego == AGARRANDO_BLOQUE) {
+            if (this.spriteGrua.x - this.spriteGrua_velX > this.bloqueGenerado.x) {
+                this.moverGrua(-this.spriteGrua_velX);
+            }
+
+            else {
+                this.moverGrua(this.bloqueGenerado.x - this.spriteGrua.x);
+                estadoJuego = AGARRANDO_BLOQUE_VOLVER;
+            }
+        }
+
+        // --------------------------------------------------
+        // Llevar la grua al centro con el bloque generado
+        // --------------------------------------------------
+
+        if (estadoJuego == AGARRANDO_BLOQUE_VOLVER) {
+            if (this.spriteGrua.x + this.spriteGrua_velX < cc.winSize.width * 0.5) {
+                this.moverGrua(this.spriteGrua_velX);
+                this.moverBloqueGenerado(this.spriteGrua_velX);
+            }
+
+            else {
+                this.moverGrua(cc.winSize.width * 0.5 - this.spriteGrua.x);
+                this.moverBloqueGenerado(cc.winSize.width * 0.5 - this.spriteGrua.x);
+                estadoJuego = SOLTAR_BLOQUE;
             }
         }
 
@@ -359,7 +409,7 @@ var GameLayer = cc.Layer.extend({
         // ---------------------------
 
         // se buscan las formas que han caído fuera, para eliminarlas
-        for(var i = 0; i < this.formasEliminar.length; i++) {
+        for (var i = 0; i < this.formasEliminar.length; i++) {
             var shape = this.formasEliminar[i];
 
             for (var i = 0; i < this.arrayBloques.length; i++) {

@@ -125,32 +125,21 @@ var ControlesLayer = cc.Layer.extend({
 
             if (estadoJuego == AGARRAR_BLOQUE) {
                 if (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) )
-                    && instancia.bloqueGenerado != null) {
+                    && estadoJuego == AGARRAR_BLOQUE) {
 
                     estadoJuego = AGARRANDO_BLOQUE;
-
-                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
-                    instancia.colocarGruaEncimaBloque();
-
-                    setTimeout(() => {
-                            instancia.agarrarBloque();
-                        },
-                        1500);
                 }
             }
 
             else if (estadoJuego == SOLTAR_BLOQUE) {
                 if (cc.rectContainsPoint(areaBotonSoltar, cc.p(event.getLocationX(), event.getLocationY()))
-                    && instancia.bloqueGrua != null) {
+                    && estadoJuego == SOLTAR_BLOQUE) {
 
                     estadoJuego = SOLTANDO_BLOQUE;
 
-                    cc.director.getActionManager().removeAllActionsFromTarget(instancia.spriteGrua, true);
-                    instancia.arrayBloques.push(instancia.bloqueGrua);
+                    instancia.arrayBloques.push(instancia.bloqueGenerado);
 
-                    var body = instancia.bloqueGrua.getBody();
-
-                    instancia.bloqueGrua = null;
+                    var body = instancia.bloqueGenerado.getBody();
                     instancia.space.addBody(body);
 
                     setTimeout(() => {
