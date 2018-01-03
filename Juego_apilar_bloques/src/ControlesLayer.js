@@ -5,8 +5,7 @@ var ControlesLayer = cc.Layer.extend({
 
     botonDcha:null,
     botonIzda:null,
-    botonCoger:null,
-    botonSoltar:null,
+    botonAgarrarSoltar:null,
 
     bloquesGenerados:null,
 
@@ -93,23 +92,14 @@ var ControlesLayer = cc.Layer.extend({
 
         this.addChild(this.botonDcha);
 
-        // --------------------------
-        // Botón agarrar bloque
-        // --------------------------
+        // --------------------------------
+        // Botón agarrar y soltar bloque
+        // --------------------------------
 
-        this.botonCoger = cc.Sprite.create(res.joypad_drag_drop_png);
-        this.botonCoger.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.45));
+        this.botonAgarrarSoltar = cc.Sprite.create(res.joypad_drag_drop_png);
+        this.botonAgarrarSoltar.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.5));
 
-        this.addChild(this.botonCoger);
-
-        // ------------------------
-        // Botón soltar bloque
-        // ------------------------
-
-        this.botonSoltar = cc.Sprite.create(res.joypad_png);
-        this.botonSoltar.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.45));
-
-        this.addChild(this.botonSoltar);
+        this.addChild(this.botonAgarrarSoltar);
     },
 
 
@@ -120,21 +110,16 @@ var ControlesLayer = cc.Layer.extend({
 
             var areaBotonIzda = instanciaCon.botonIzda.getBoundingBox();
             var areaBotonDcha = instanciaCon.botonDcha.getBoundingBox();
-            var areaBotonCoger = instanciaCon.botonCoger.getBoundingBox();
-            var areaBotonSoltar = instanciaCon.botonSoltar.getBoundingBox();
+            var areaBotonAgarrarSoltar = instanciaCon.botonAgarrarSoltar.getBoundingBox();
 
             if (estadoJuego == AGARRAR_BLOQUE) {
-                if (cc.rectContainsPoint( areaBotonCoger, cc.p(event.getLocationX(), event.getLocationY()) )
-                    && estadoJuego == AGARRAR_BLOQUE) {
-
+                if (cc.rectContainsPoint( areaBotonAgarrarSoltar, cc.p(event.getLocationX(), event.getLocationY()) )) {
                     estadoJuego = AGARRANDO_BLOQUE;
                 }
             }
 
             else if (estadoJuego == SOLTAR_BLOQUE) {
-                if (cc.rectContainsPoint(areaBotonSoltar, cc.p(event.getLocationX(), event.getLocationY()))
-                    && estadoJuego == SOLTAR_BLOQUE) {
-
+                if (cc.rectContainsPoint( areaBotonAgarrarSoltar, cc.p(event.getLocationX(), event.getLocationY()) )) {
                     estadoJuego = SOLTANDO_BLOQUE;
 
                     instancia.arrayBloques.push(instancia.bloqueGenerado);
