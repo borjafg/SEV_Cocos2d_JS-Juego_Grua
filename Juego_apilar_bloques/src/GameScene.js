@@ -5,10 +5,14 @@
 var AGARRAR_BLOQUE = 0;
 var AGARRANDO_BLOQUE = 1;
 var AGARRANDO_BLOQUE_VOLVER = 2;
+
 var SOLTAR_BLOQUE = 3;
 var SOLTANDO_BLOQUE = 4;
 
+var TODOS_BLOQUES_COLOCADOS = 5;
+
 var estadoJuego = AGARRAR_BLOQUE;
+
 
 // ----------------------
 // Tipo de colisisones
@@ -16,6 +20,7 @@ var estadoJuego = AGARRAR_BLOQUE;
 
 var tipoMuro = 2;
 var tipoBloque = 3;
+
 
 // -----------------------------------------------------
 // Número de bloques que hay que generar en un nivel
@@ -26,6 +31,9 @@ var bloqueGenerar_Maximo = 15;
 
 var bloquesGenerar_actual = bloquesGenerar_inicial;
 var bloquesGenerar_incrementarUnidades = 5;
+
+var numeroBloquesQuedan = bloquesGenerar_actual;
+
 
 // ------------------------------------------
 // Tipo de bloques que se pueden generar
@@ -61,6 +69,7 @@ var tamanioPlataforma_incrementarCadaNiveles = 1;
 
 var nivelActual = 1;
 var nivelMaximo = 3;
+
 
 // -------------------
 // Capas utilizadas
@@ -171,7 +180,9 @@ var GameLayer = cc.Layer.extend({
         // Inicializar elementos del juego
         // ----------------------------------
 
-        this.bloquesGenerados = 0;
+        numeroBloquesQuedan = bloquesGenerar_actual;
+        estadoJuego = AGARRAR_BLOQUE;
+
         this.inicializarPlataformas();
         this.inicializarGrua();
         this.generarBloqueAleatorio();
@@ -227,6 +238,7 @@ var GameLayer = cc.Layer.extend({
 
         this.addChild(spritePlataforma);
 
+
         // ----------------------------------------
         // Plataforma de generación de bloques
         // ----------------------------------------
@@ -244,6 +256,13 @@ var GameLayer = cc.Layer.extend({
         this.addChild(spritePlataformaGen);
 
         this.spritePlataformaGeneracion = spritePlataformaGen;
+    },
+
+
+    cambiarTamanioPlataforma: function(nuevoTamanio) {
+        if(nuevoTamanio >= tamanioPlataforma_minimo && nuevoTamanio <= tamanioPlataforma_maximo) {
+            tamanioPlataforma = this.nuevoTamanio;
+        }
     },
 
 
@@ -301,14 +320,6 @@ var GameLayer = cc.Layer.extend({
 
         }
         **/
-        this.bloquesGenerados++;
-    },
-
-
-    cambiarTamanioPlataforma: function(nuevoTamanio) {
-        if(nuevoTamanio >= tamanioPlataforma_minimo && nuevoTamanio <= tamanioPlataforma_maximo) {
-            tamanioPlataforma = this.nuevoTamanio;
-        }
     },
 
 
@@ -330,6 +341,15 @@ var GameLayer = cc.Layer.extend({
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     update: function(dt) {
+        // ------------------------------------------
+        // Comrpobar si quedan bloques que colocar
+        // ------------------------------------------
+
+        if (estadoJuego == TODOS_BLOQUES_COLOCADOS) {
+            cc.director.runScene(new GameScene());
+        }
+
+
         // ---------------------------
         // Movimiento de la grua
         // ---------------------------
@@ -372,6 +392,7 @@ var GameLayer = cc.Layer.extend({
             }
         }
 
+
         // --------------------------------------------------
         // Colocar la grúa encima del bloque
         // --------------------------------------------------
@@ -386,6 +407,7 @@ var GameLayer = cc.Layer.extend({
                 estadoJuego = AGARRANDO_BLOQUE_VOLVER;
             }
         }
+
 
         // --------------------------------------------------
         // Llevar la grua al centro con el bloque generado
@@ -403,6 +425,7 @@ var GameLayer = cc.Layer.extend({
                 estadoJuego = SOLTAR_BLOQUE;
             }
         }
+
 
         // ---------------------------
         // Eliminación de bloques
@@ -425,6 +448,7 @@ var GameLayer = cc.Layer.extend({
 
         this.formasEliminar = [];
     }
+
 });
 
 

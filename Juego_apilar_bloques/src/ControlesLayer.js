@@ -1,13 +1,18 @@
+// ======================================
+// Capa de la escena
+// ======================================
+
 var ControlesLayer = cc.Layer.extend({
 
-    vidas:3,
-    etiquetaVidas:null,
+    vidasQuedan: 3,
 
-    botonDcha:null,
-    botonIzda:null,
-    botonAgarrarSoltar:null,
+    indicadorVidas: null,
+    indicadorNivel: null,
+    indicadorBloquesNoColocados: null,
 
-    bloquesGenerados:null,
+    botonDcha: null,
+    botonIzda: null,
+    botonAgarrarSoltar: null,
 
 
     ctor:function () {
@@ -15,10 +20,33 @@ var ControlesLayer = cc.Layer.extend({
         var size = cc.winSize;
 
         this.inicializarBotonesControl();
-        this.etiquetaVidas = new cc.LabelTTF("Vidas: " + this.vidas, "Helvetica", 20);
-        this.etiquetaVidas.setPosition(cc.p(size.width - 85, 420));
-        this.etiquetaVidas.fillStyle = new cc.Color(255, 255, 255, 255);
-        this.addChild(this.etiquetaVidas);
+
+        // --------------------------------------------------------------
+        // Añadir indicadores (vidas restantes, bloques sin colacar...)
+        // --------------------------------------------------------------
+
+        this.indicadorBloquesNoColocados =
+            new cc.LabelTTF("Quedan " + numeroBloquesQuedan + " bloques", "Helvetica", 17);
+
+        this.indicadorBloquesNoColocados.setPosition(cc.p(size.width - 110, size.height - 20));
+        this.indicadorBloquesNoColocados.fillStyle = new cc.Color(255, 255, 255, 255);
+
+        this.addChild(this.indicadorBloquesNoColocados);
+
+
+        this.indicadorNivel = new cc.LabelTTF("Nivel actual: " + nivelActual, "Helvetica", 17);
+        this.indicadorNivel.setPosition(cc.p(size.width - 110, size.height - 40));
+        this.indicadorNivel.fillStyle = new cc.Color(255, 255, 255, 255);
+
+        this.addChild(this.indicadorNivel);
+
+
+        this.indicadorVidas = new cc.LabelTTF("Vidas: " + this.vidasQuedan, "Helvetica", 17);
+        this.indicadorVidas.setPosition(cc.p(size.width - 110, size.height - 60));
+        this.indicadorVidas.fillStyle = new cc.Color(255, 255, 255, 255);
+
+        this.addChild(this.indicadorVidas);
+
 
         // --------------------------
         // Añadir listeners
@@ -67,7 +95,12 @@ var ControlesLayer = cc.Layer.extend({
             }
         }, this); // Fin del listener KEYBOARD
 
-        this.scheduleUpdate();
+
+        // --------------------------------------------------------------
+        // No hace falta que se actualice en cada iteración del juego
+        // --------------------------------------------------------------
+
+        //this.scheduleUpdate();
 
         return true;
     },
@@ -121,17 +154,27 @@ var ControlesLayer = cc.Layer.extend({
             else if (estadoJuego == SOLTAR_BLOQUE) {
                 if (cc.rectContainsPoint( areaBotonAgarrarSoltar, cc.p(event.getLocationX(), event.getLocationY()) )) {
                     estadoJuego = SOLTANDO_BLOQUE;
+                    instanciaCon.indicarBloqueColocado();
 
                     instancia.arrayBloques.push(instancia.bloqueGenerado);
 
                     var body = instancia.bloqueGenerado.getBody();
                     instancia.space.addBody(body);
 
-                    setTimeout(() => {
-                            instancia.generarBloqueAleatorio();
-                            estadoJuego = AGARRAR_BLOQUE;
-                        },
-                        4000);
+                    if(numeroBloquesQuedan > 0) {
+                        setTimeout(() => {
+                                instancia.generarBloqueAleatorio();
+                                estadoJuego = AGARRAR_BLOQUE;
+                            },
+                            4000);
+                    }
+
+                    else {
+                        setTimeout(() => {
+                                estadoJuego = TODOS_BLOQUES_COLOCADOS;
+                            },
+                            5000);
+                    }
                 }
 
                 else if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
@@ -143,7 +186,7 @@ var ControlesLayer = cc.Layer.extend({
                     instancia.grua_moverIzquierda = false;
                     instancia.grua_moverDerecha = true;
                 }
-            }   // Fin del estado == SOLTAR_BLOQUE
+            }   // Fin del else if  estado == SOLTAR_BLOQUE
 
         }   // Fin del if  estado == AGARRAR_BLOQUE || estaodo == SOLTAR_BLOQUE
     },
@@ -159,10 +202,16 @@ var ControlesLayer = cc.Layer.extend({
 
 
     restarVida: function() {
-        this.vidas--;
-        this.etiquetaVidas.setString("Vidas: " + this.vidas);
+        this.vidasQuedan--;
+        this.indicadorVidas.setString("Vidas: " + this.vidasQuedan);
 
-        return this.vidas;
+        return this.vidasQuedan;
+    },
+
+
+    indicarBloqueColocado: function() {
+        numeroBloquesQuedan--;
+        this.indicadorBloquesNoColocados.setString("Quedan " + numeroBloquesQuedan + " bloques");
     },
 
 
@@ -171,4 +220,3 @@ var ControlesLayer = cc.Layer.extend({
     }
 
 });
-
