@@ -4,7 +4,7 @@
 
 var ControlesLayer = cc.Layer.extend({
 
-    vidasQuedan: 3,
+    vidasQuedan: null,
 
     indicadorVidas: null,
     indicadorNivel: null,
@@ -14,18 +14,26 @@ var ControlesLayer = cc.Layer.extend({
     botonIzda: null,
     botonAgarrarSoltar: null,
 
-    soltarBloque: false,
+    soltarBloque: null,
+    generarBloqueTiempoInicial: null,
 
 
     ctor:function () {
         this._super();
         var size = cc.winSize;
 
+        // ------------------------------------------------
+        // Inicializar elementos del nivel
+        // ------------------------------------------------
+
         this.inicializarBotonesControl();
 
-        // --------------------------------------------------------------
+        this.soltarBloque = false;
+        this.vidasQuedan = 1;
+
+        // ----------------------------------------------------------------
         // Añadir indicadores (vidas restantes, bloques sin colacar...)
-        // --------------------------------------------------------------
+        // ----------------------------------------------------------------
 
         this.indicadorBloquesNoColocados =
             new cc.LabelTTF("Quedan " + numeroBloquesQuedan + " bloques", "Helvetica", 17);
@@ -206,34 +214,37 @@ var ControlesLayer = cc.Layer.extend({
 
 
     update: function(dt) {
-        instancia = this.getParent().getChildByTag(idCapaJuego);
-
         if (this.soltarBloque) {
+            instancia = this.getParent().getChildByTag(idCapaJuego);
+
             estadoJuego = SOLTANDO_BLOQUE;
             this.soltarBloque = false;
 
             this.indicarBloqueColocado();
-
             instancia.arrayBloques.push(instancia.bloqueGenerado);
 
             var body = instancia.bloqueGenerado.getBody();
             instancia.space.addBody(body);
 
-            if (numeroBloquesQuedan > 0) {
-                setTimeout(() => {
-                        instancia.generarBloqueAleatorio();
-                        estadoJuego = AGARRAR_BLOQUE;
-                    },
-                    5000);
-            }
+            this.generarBloqueTiempoInicial = new Date().getTime();
+        }   // Fin del if  this.soltarBloque
 
-            else {
-                setTimeout(() => {
-                        estadoJuego = TODOS_BLOQUES_COLOCADOS;
-                    },
-                    5000);
+
+        // Esperamos para generar otro bloque después de soltar el anterior
+        if (estadoJuego == SOLTANDO_BLOQUE) {
+            var tiempoActual = new Date().getTime();
+
+            if (tiempoActual > (this.generarBloqueTiempoInicial + tiempoGeneracionBloques)) {
+                if (numeroBloquesQuedan > 0) {
+                    instancia.generarBloqueAleatorio();
+                    estadoJuego = AGARRAR_BLOQUE;
+                }
+
+                else {
+                    estadoJuego = TODOS_BLOQUES_COLOCADOS;
+                }
             }
-        }   // Fin del if  soltarBloque
+        }   // Fin del if  estadoJuego == SOLTANDO_BLOQUE
     }
 
 });

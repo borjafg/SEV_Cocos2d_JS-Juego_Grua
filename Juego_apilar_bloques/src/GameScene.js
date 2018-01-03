@@ -32,7 +32,9 @@ var bloqueGenerar_Maximo = 15;
 var bloquesGenerar_actual = bloquesGenerar_inicial;
 var bloquesGenerar_incrementarUnidades = 5;
 
+
 var numeroBloquesQuedan = bloquesGenerar_actual;
+var tiempoGeneracionBloques = 4000; // Generar un nuevo bloque cada X milisegundos
 
 
 // ------------------------------------------
@@ -91,15 +93,15 @@ var GameLayer = cc.Layer.extend({
     spritePlataformaGeneracion: null,
 
     spriteGrua: null,
-    spriteGrua_velX: 3,
+    spriteGrua_velX: null,
 
     arrayBloques: [],
     formasEliminar: [],
 
     bloqueGenerado: null,
 
-    grua_moverIzquierda: false,
-    grua_moverDerecha: false,
+    grua_moverIzquierda: null,
+    grua_moverDerecha: null,
 
 
     ctor:function () {
@@ -181,11 +183,17 @@ var GameLayer = cc.Layer.extend({
         // ----------------------------------
 
         numeroBloquesQuedan = bloquesGenerar_actual;
-        estadoJuego = AGARRAR_BLOQUE;
+
+        this.spriteGrua_velX = 3;
+
+        this.grua_moverIzquierda = false;
+        this.grua_moverDerecha = false;
 
         this.inicializarPlataformas();
         this.inicializarGrua();
         this.generarBloqueAleatorio();
+
+        estadoJuego = AGARRAR_BLOQUE;
 
         // ----------------------------
         // Actualizar el juego
