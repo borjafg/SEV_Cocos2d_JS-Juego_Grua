@@ -6,9 +6,12 @@ var ControlesLayer = cc.Layer.extend({
 
     vidasQuedan: null,
 
+    tiempoRestante: null,
+
     indicadorVidas: null,
     indicadorNivel: null,
     indicadorBloquesNoColocados: null,
+    indicadorTiempo: null,
 
     botonDcha: null,
     botonIzda: null,
@@ -56,6 +59,12 @@ var ControlesLayer = cc.Layer.extend({
         this.indicadorVidas.fillStyle = new cc.Color(255, 255, 255, 255);
 
         this.addChild(this.indicadorVidas);
+
+        this.indicadorTiempo = new cc.LabelTTF("", "Helvetica", 17);
+        this.indicadorTiempo.setPosition(cc.p(size.width - 110, size.height - 80));
+        this.indicadorTiempo.fillStyle = new cc.Color(255, 255, 255, 255);
+
+
 
 
         // --------------------------
@@ -206,6 +215,10 @@ var ControlesLayer = cc.Layer.extend({
         return this.vidasQuedan;
     },
 
+    actualizarTiempoRestante: function(){
+
+    },
+
 
     indicarBloqueColocado: function() {
         numeroBloquesQuedan--;
@@ -218,6 +231,9 @@ var ControlesLayer = cc.Layer.extend({
             instancia = this.getParent().getChildByTag(idCapaJuego);
 
             estadoJuego = SOLTANDO_BLOQUE;
+
+            this.removeChild(this.indicadorTiempo);
+
             this.soltarBloque = false;
 
             this.indicarBloqueColocado();
@@ -245,6 +261,16 @@ var ControlesLayer = cc.Layer.extend({
                 }
             }
         }   // Fin del if  estadoJuego == SOLTANDO_BLOQUE
+
+        if (estadoJuego == SOLTAR_BLOQUE) {
+            instancia = this.getParent().getChildByTag(idCapaJuego);
+            var tiempoActual = new Date().getTime();
+            var tiempo = instancia.tiempoLimiteColocacion - (tiempoActual - instancia.tiempoInicialBloque);
+            if(tiempo>0){
+                this.tiempoRestante=tiempo;
+            }
+            this.indicadorTiempo.setString("Tiempo restante: " + Math.round(this.tiempoRestante/1000));
+        }
     }
 
 });

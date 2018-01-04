@@ -95,10 +95,14 @@ var GameLayer = cc.Layer.extend({
     spriteGrua: null,
     spriteGrua_velX: null,
 
+    tiempoInicialBloque: null,
+    tiempoLimiteColocacion: 5000,
+
     arrayBloques: [],
     formasEliminar: [],
 
     bloqueGenerado: null,
+    shapeBloque: null,
 
     grua_moverIzquierda: null,
     grua_moverDerecha: null,
@@ -291,6 +295,7 @@ var GameLayer = cc.Layer.extend({
 
         shape.setFriction(1);
         shape.setCollisionType(tipoBloque);
+        this.shapeBloque=shape;
         this.space.addShape(shape);
         this.addChild(spriteBloque);
 
@@ -367,6 +372,17 @@ var GameLayer = cc.Layer.extend({
         if (estadoJuego == SOLTAR_BLOQUE) {
             var desplX;
 
+            var tiempoActual = new Date().getTime();
+            if(tiempoActual - this.tiempoInicialBloque > this.tiempoLimiteColocacion){
+                var controles = this.getParent().getChildByTag(idCapaControles);
+
+                if(controles.restarVida() == 0) {
+                    setTimeout(()=>cc.director.runScene(new GameScene()),1000);
+                }
+                this.formasEliminar.push(this.shapeBloque);
+                estadoJuego = AGARRAR_BLOQUE;
+            }
+
             if (this.grua_moverIzquierda) {
                 if (this.spriteGrua.x - this.spriteGrua_velX > cc.winSize.width * 0.3) {
                     desplX = -this.spriteGrua_velX;
@@ -398,6 +414,7 @@ var GameLayer = cc.Layer.extend({
                     this.moverBloqueGenerado(desplX);
                 }
             }
+
         }
 
 
@@ -431,6 +448,9 @@ var GameLayer = cc.Layer.extend({
                 this.moverGrua(cc.winSize.width * 0.5 - this.spriteGrua.x);
                 this.moverBloqueGenerado(cc.winSize.width * 0.5 - this.spriteGrua.x);
                 estadoJuego = SOLTAR_BLOQUE;
+                this.tiempoInicialBloque = new Date().getTime();
+                var controles = this.getParent().getChildByTag(idCapaControles);
+                controles.addChild(controles.indicadorTiempo);
             }
         }
 
