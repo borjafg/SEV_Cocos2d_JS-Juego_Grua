@@ -58,7 +58,6 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             spriteFigura.setBody(body);
 
             shape = new cp.CircleShape(body, this.spritePelota.width / 2, cp.vzero);
-            shape.setCollisionType(tipoFigura);
 
             break;
 
