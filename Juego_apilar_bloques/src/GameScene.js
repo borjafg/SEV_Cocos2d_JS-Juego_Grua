@@ -19,7 +19,7 @@ var estadoJuego = AGARRAR_BLOQUE;
 // ----------------------
 
 var tipoMuro = 2;
-var tipoBloque = 3;
+var tipoFigura = 3;
 
 
 // -----------------------------------------------------
@@ -102,7 +102,6 @@ var GameLayer = cc.Layer.extend({
     formasEliminar: [],
 
     bloqueGenerado: null,
-    shapeBloque: null,
 
     grua_moverIzquierda: null,
     grua_moverDerecha: null,
@@ -131,6 +130,7 @@ var GameLayer = cc.Layer.extend({
         // --------------------------
 
         cc.spriteFrameCache.addSpriteFrames(res.animacioncocodrilo_plist);
+        cc.spriteFrameCache.addSpriteFrames(res.animacioncirculo_plist);
 
         // --------------------
         // Crear el fondo
@@ -180,7 +180,7 @@ var GameLayer = cc.Layer.extend({
         // ------------------------------------------
 
         // muro y bloque
-        this.space.addCollisionHandler(tipoMuro, tipoBloque, null, null, this.collisionBloqueConMuro.bind(this), null);
+        this.space.addCollisionHandler(tipoMuro, tipoFigura, null, null, this.collisionBloqueConMuro.bind(this), null);
 
         // ----------------------------------
         // Inicializar elementos del juego
@@ -279,60 +279,34 @@ var GameLayer = cc.Layer.extend({
 
 
     generarBloqueAleatorio: function() {
-        var spriteBloque = new cc.PhysicsSprite("#cocodrilo1.png");
+        /*var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
 
-        console.log("Ancho: " + spriteBloque.width + ", Alto: " + spriteBloque.height);
-
-        // Masa 1
-        var body = new cp.Body(1, cp.momentForBox(1, spriteBloque.width, spriteBloque.height));
-
-        body.p = cc.p(this.spritePlataformaGeneracion.x,
-            this.spritePlataformaGeneracion.y + this.spritePlataformaGeneracion.height / 2 + spriteBloque.height / 2);
-
-        spriteBloque.setBody(body);
-
-        var shape = new cp.BoxShape(body, spriteBloque.width, spriteBloque.height);
-
-        shape.setFriction(1);
-        shape.setCollisionType(tipoBloque);
-        this.shapeBloque=shape;
-        this.space.addShape(shape);
-        this.addChild(spriteBloque);
-
-        this.bloqueGenerado = spriteBloque;
-        /**
-        var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
-        if (valorAleatorio <= 5) { // Generar un cuadrado
-            //var dn = new cc.DrawNode();
-            //this.addChild(dn, 500);
-            //dn.drawPoly([cc.p(50,50), cc.p(100, 70), cc.p(110, 100), cc.p(120, 80), cc.p(70, 40)], cc.p(500,500),  cc.color(249,255,115), 100,  cc.color(249,255,115));
-            //dn.runAction(
-            //    cc.repeatForever(
-            //        cc.rotateBy(1, 10)
-            //    )
-            //);
-        }
+        if (valorAleatorio <= 5) { // Generar un cuadrado*/
+            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO, this.spritePlataformaGeneracion, this.space);
+        /*}
 
         else if (valorAleatorio <= 10) { // Generar un rectangulo en posición horizontal
-
+            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_HORIZONTAL);
         }
 
         else if (valorAleatorio <= 15) { // Generar un círculo
-
+            this.bloqueGenerado = generarFigura(FIGURA_CIRCULO);
         }
 
         else if (valorAleatorio <= 20) { // Generar un rectángulo en posición vertical
-
+            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL);
         }
 
         else if (valorAleatorio <= 25) { // Generar un triángulo
-
+            this.bloqueGenerado = generarFigura(FIGURA_TRIANGULO);
         }
 
         else { // En cualquier otro caso: generar un cuadrado
-
+            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO);
         }
-        **/
+        */
+
+        this.addChild(this.bloqueGenerado);
     },
 
 
@@ -354,6 +328,8 @@ var GameLayer = cc.Layer.extend({
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     update: function(dt) {
+        this.space.step(dt);
+
         // ------------------------------------------
         // Comrpobar si quedan bloques que colocar
         // ------------------------------------------
@@ -363,25 +339,28 @@ var GameLayer = cc.Layer.extend({
         }
 
 
-        // ---------------------------
-        // Movimiento de la grua
-        // ---------------------------
-
-        this.space.step(dt);
-
-        if (estadoJuego == SOLTAR_BLOQUE) {
-            var desplX;
+        else if (estadoJuego == SOLTAR_BLOQUE) {
+            // -------------------------------------------------------------
+            // Comprobar si se le acabó el tiempo para colocar el bloque
+            // -------------------------------------------------------------
 
             var tiempoActual = new Date().getTime();
+
             if(tiempoActual - this.tiempoInicialBloque > this.tiempoLimiteColocacion){
                 var controles = this.getParent().getChildByTag(idCapaControles);
 
                 if(controles.restarVida() == 0) {
-                    setTimeout(()=>cc.director.runScene(new GameScene()),1000);
+                    cc.director.runScene(new GameScene());
                 }
-                this.formasEliminar.push(this.shapeBloque);
-                estadoJuego = AGARRAR_BLOQUE;
+
+                return;
             }
+
+            // ---------------------------
+            // Movimiento de la grua
+            // ---------------------------
+
+            var desplX;
 
             if (this.grua_moverIzquierda) {
                 if (this.spriteGrua.x - this.spriteGrua_velX > cc.winSize.width * 0.3) {
@@ -422,7 +401,7 @@ var GameLayer = cc.Layer.extend({
         // Colocar la grúa encima del bloque
         // --------------------------------------------------
 
-        if (estadoJuego == AGARRANDO_BLOQUE) {
+        else if (estadoJuego == AGARRANDO_BLOQUE) {
             if (this.spriteGrua.x - this.spriteGrua_velX > this.bloqueGenerado.x) {
                 this.moverGrua(-this.spriteGrua_velX);
             }

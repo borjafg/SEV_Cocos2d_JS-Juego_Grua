@@ -22,7 +22,10 @@ var res = {
 
     cocodrilo_1_png : "res/cocodrilo_1.png",
     animacioncocodrilo_png : "res/animacioncocodrilo.png",
-    animacioncocodrilo_plist : "res/animacioncocodrilo.plist"
+    animacioncocodrilo_plist : "res/animacioncocodrilo.plist",
+
+    animacioncirculo_png : "res/animacion_circulo.png",
+    animacioncirculo_plist : "res/animacion_circulo.plist"
 };
 
 var g_resources = [];

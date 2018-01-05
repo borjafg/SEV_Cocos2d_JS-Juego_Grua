@@ -15,7 +15,8 @@
         "src/resource.js",
         "src/app.js",
         "src/GameScene.js",
-        "src/ControlesLayer.js"
+        "src/ControlesLayer.js",
+        "src/Figures.js"
     ]
 
 }
