@@ -281,32 +281,36 @@ var GameLayer = cc.Layer.extend({
     generarBloqueAleatorio: function() {
         /*var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
 
-        if (valorAleatorio <= 5) { // Generar un cuadrado*/
-            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO, this.spritePlataformaGeneracion, this.space);
-        /*}
+        if (valorAleatorio <= 5) { // Generar un cuadrado
+            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO,
+                this.spritePlataformaGeneracion, this.space, this);
+        }
 
         else if (valorAleatorio <= 10) { // Generar un rectangulo en posición horizontal
-            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_HORIZONTAL);
+            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_HORIZONTAL,
+                this.spritePlataformaGeneracion, this.space, this);
         }
 
         else if (valorAleatorio <= 15) { // Generar un círculo
-            this.bloqueGenerado = generarFigura(FIGURA_CIRCULO);
+            this.bloqueGenerado = generarFigura(FIGURA_CIRCULO,
+                this.spritePlataformaGeneracion, this.space, this);
         }
 
         else if (valorAleatorio <= 20) { // Generar un rectángulo en posición vertical
-            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL);
+            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL
+                this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 25) { // Generar un triángulo
-            this.bloqueGenerado = generarFigura(FIGURA_TRIANGULO);
+        else if (valorAleatorio <= 25) { // Generar un triángulo */
+            this.bloqueGenerado = generarFigura(FIGURA_TRIANGULO,
+                this.spritePlataformaGeneracion, this.space, this); /*
         }
 
         else { // En cualquier otro caso: generar un cuadrado
-            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO);
+            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO,
+                this.spritePlataformaGeneracion, this.space, this);
         }
         */
-
-        this.addChild(this.bloqueGenerado);
     },
 
 

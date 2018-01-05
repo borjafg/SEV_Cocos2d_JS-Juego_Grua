@@ -24,6 +24,8 @@ var res = {
     animacioncocodrilo_png : "res/animacioncocodrilo.png",
     animacioncocodrilo_plist : "res/animacioncocodrilo.plist",
 
+    figura_triangulo_png : "res/figura_triangulo.png",
+
     animacioncirculo_png : "res/animacion_circulo.png",
     animacioncirculo_plist : "res/animacion_circulo.plist"
 };
