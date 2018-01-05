@@ -50,7 +50,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
 
 
         case FIGURA_CIRCULO:
-            spriteFigura = new cc.PhysicsSprite("#animacion_circulo1.png");
+            spriteFigura = new cc.PhysicsSprite(res.figura_circulo_png);
 
             // Momento de inercia del círculo:
             // -> Masa: 1
@@ -58,12 +58,12 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             // -> Radio exterior: la mitad del ancho del sprite
             // -> Offset (ver como se crea un triángulo)
             //
-            body = new cp.Body(1, cp.momentForCircle(1, 0, this.spriteFigura.width / 2, cp.vzero));
-            body.p = posicion;
+            body = new cp.Body(1, cp.momentForCircle(1, 0, spriteFigura.width / 2, cp.vzero));
+            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
 
             spriteFigura.setBody(body);
 
-            shape = new cp.CircleShape(body, this.spriteFigura.width / 2, cp.vzero);
+            shape = new cp.CircleShape(body, spriteFigura.width / 2, cp.vzero);
 
             break;
 

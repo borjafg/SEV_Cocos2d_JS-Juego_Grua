@@ -25,6 +25,7 @@ var res = {
     animacioncocodrilo_plist : "res/animacioncocodrilo.plist",
 
     figura_triangulo_png : "res/figura_triangulo.png",
+    figura_circulo_png : "res/figura_circulo.png",
 
     animacioncirculo_png : "res/animacion_circulo.png",
     animacioncirculo_plist : "res/animacion_circulo.plist"

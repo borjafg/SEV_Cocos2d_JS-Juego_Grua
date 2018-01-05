@@ -130,7 +130,6 @@ var GameLayer = cc.Layer.extend({
         // --------------------------
 
         cc.spriteFrameCache.addSpriteFrames(res.animacioncocodrilo_plist);
-        cc.spriteFrameCache.addSpriteFrames(res.animacioncirculo_plist);
 
         // --------------------
         // Crear el fondo
@@ -291,19 +290,19 @@ var GameLayer = cc.Layer.extend({
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 15) { // Generar un círculo
+        else if (valorAleatorio <= 15) { // Generar un círculo */
             this.bloqueGenerado = generarFigura(FIGURA_CIRCULO,
-                this.spritePlataformaGeneracion, this.space, this);
+                this.spritePlataformaGeneracion, this.space, this); /*
         }
 
         else if (valorAleatorio <= 20) { // Generar un rectángulo en posición vertical
-            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL
+            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 25) { // Generar un triángulo */
+        else if (valorAleatorio <= 25) { // Generar un triángulo
             this.bloqueGenerado = generarFigura(FIGURA_TRIANGULO,
-                this.spritePlataformaGeneracion, this.space, this); /*
+                this.spritePlataformaGeneracion, this.space, this);
         }
 
         else { // En cualquier otro caso: generar un cuadrado
