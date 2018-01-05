@@ -24,11 +24,10 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
 
     switch (tipoFiguraGenerar) {
         case FIGURA_CUADRADO:
-            console.log("==>  Generado un cuadrado");
+            console.log("==> Generado un cuadrado");
 
-            spriteFigura = new cc.PhysicsSprite("#cocodrilo1.png");
+            spriteFigura = new cc.PhysicsSprite(res.figura_cuadrado_png);
 
-            // Masa 1
             body = new cp.Body(1, cp.momentForBox(1, spriteFigura.width, spriteFigura.height));
 
             body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
@@ -40,16 +39,38 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
 
 
         case FIGURA_RECTANGULO_HORIZONTAL:
+            console.log("==> Generado un rectángulo horizontal");
+
+            spriteFigura = new cc.PhysicsSprite(res.figura_barra_horizontal_png);
+
+            body = new cp.Body(1, cp.momentForBox(1, spriteFigura.width, spriteFigura.height));
+
+            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            spriteFigura.setBody(body);
+
+            shape = new cp.BoxShape(body, spriteFigura.width, spriteFigura.height);
 
             break;
 
 
         case FIGURA_RECTANGULO_VERTICAL:
+            console.log("==> Generado un rectángulo vertical");
+
+            spriteFigura = new cc.PhysicsSprite(res.figura_barra_vertical_png);
+
+            body = new cp.Body(1, cp.momentForBox(1, spriteFigura.width, spriteFigura.height));
+
+            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            spriteFigura.setBody(body);
+
+            shape = new cp.BoxShape(body, spriteFigura.width, spriteFigura.height);
 
             break;
 
 
         case FIGURA_CIRCULO:
+            console.log("==> Generado un círculo");
+
             spriteFigura = new cc.PhysicsSprite(res.figura_circulo_png);
 
             // Momento de inercia del círculo:
@@ -69,6 +90,8 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
 
 
         case FIGURA_TRIANGULO:
+            console.log("==> Generado un triángulo");
+
             spriteFigura = new cc.PhysicsSprite(res.figura_triangulo_png);
 
             // Hay que definir los vértices en el
@@ -113,6 +136,8 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
 
 
         default:
+            console.log("==> Figura desconocida: generando un cuadrado");
+
             return generarFigura(FIGURA_CUADRADO, plataformaGenereacionBloques, espacio, capaJuego);
     }
 

@@ -20,12 +20,11 @@ var res = {
     joypad_drag_drop_png : "res/pad_drag_and_drop.png",
     joypad_png : "res/joypad.png",
 
-    cocodrilo_1_png : "res/cocodrilo_1.png",
-    animacioncocodrilo_png : "res/animacioncocodrilo.png",
-    animacioncocodrilo_plist : "res/animacioncocodrilo.plist",
-
+    figura_cuadrado_png : "res/figura_cuadrado.png",
     figura_triangulo_png : "res/figura_triangulo.png",
     figura_circulo_png : "res/figura_circulo.png",
+    figura_barra_horizontal_png : "res/figura_barra_horizontal.png",
+    figura_barra_vertical_png : "res/figura_barra_vertical.png",
 
     animacioncirculo_png : "res/animacion_circulo.png",
     animacioncirculo_plist : "res/animacion_circulo.plist"

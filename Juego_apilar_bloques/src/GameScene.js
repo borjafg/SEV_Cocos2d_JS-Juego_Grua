@@ -37,18 +37,18 @@ var numeroBloquesQuedan = bloquesGenerar_actual;
 var tiempoGeneracionBloques = 4000; // Generar un nuevo bloque cada X milisegundos
 
 
-// ------------------------------------------
-// Tipo de bloques que se pueden generar
-// ------------------------------------------
+// ----------------------------------------------------------------
+// Tipo de bloques que se pueden generar (Hay 5 tipos de bloques)
+// ----------------------------------------------------------------
 
-var baseGenerarBloques_inicial = 10;
-var baseGenerarBloques_maximo = 30;
+var baseGenerarBloques_inicial = 100;
+var baseGenerarBloques_maximo = 100;
 
 var baseGenerarBloques_actual = baseGenerarBloques_inicial;
 
-// Cada 5 unidades puede generarse un nuevo tipo de figura
+// Cada 20 unidades puede generarse un nuevo tipo de figura
 // Este incremento se aplicará en cada cambio de nivel
-var baseGenerarBloques_incrementarUnidades = 5;
+var baseGenerarBloques_incrementarUnidades = 20;
 
 
 // ----------------------------------------------------------------
@@ -124,12 +124,6 @@ var GameLayer = cc.Layer.extend({
 
         this.depuracion = new cc.PhysicsDebugNode(this.space);
         this.addChild(this.depuracion, 10);
-
-        // --------------------------
-        // Cachear los sprites
-        // --------------------------
-
-        cc.spriteFrameCache.addSpriteFrames(res.animacioncocodrilo_plist);
 
         // --------------------
         // Crear el fondo
@@ -278,29 +272,29 @@ var GameLayer = cc.Layer.extend({
 
 
     generarBloqueAleatorio: function() {
-        /*var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
+        var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
 
-        if (valorAleatorio <= 5) { // Generar un cuadrado
+        if (valorAleatorio <= 20) { // Generar un cuadrado
             this.bloqueGenerado = generarFigura(FIGURA_CUADRADO,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 10) { // Generar un rectangulo en posición horizontal
+        else if (valorAleatorio <= 40) { // Generar un rectangulo en posición horizontal
             this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_HORIZONTAL,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 15) { // Generar un círculo */
+        else if (valorAleatorio <= 60) { // Generar un círculo
             this.bloqueGenerado = generarFigura(FIGURA_CIRCULO,
-                this.spritePlataformaGeneracion, this.space, this); /*
+                this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 20) { // Generar un rectángulo en posición vertical
+        else if (valorAleatorio <= 80) { // Generar un rectángulo en posición vertical
             this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
-        else if (valorAleatorio <= 25) { // Generar un triángulo
+        else if (valorAleatorio <= 100) { // Generar un triángulo
             this.bloqueGenerado = generarFigura(FIGURA_TRIANGULO,
                 this.spritePlataformaGeneracion, this.space, this);
         }
@@ -309,7 +303,6 @@ var GameLayer = cc.Layer.extend({
             this.bloqueGenerado = generarFigura(FIGURA_CUADRADO,
                 this.spritePlataformaGeneracion, this.space, this);
         }
-        */
     },
 
 
@@ -349,7 +342,7 @@ var GameLayer = cc.Layer.extend({
 
             var tiempoActual = new Date().getTime();
 
-            if(tiempoActual - this.tiempoInicialBloque > this.tiempoLimiteColocacion){
+            if (tiempoActual - this.tiempoInicialBloque > this.tiempoLimiteColocacion){
                 var controles = this.getParent().getChildByTag(idCapaControles);
 
                 if(controles.restarVida() == 0) {
