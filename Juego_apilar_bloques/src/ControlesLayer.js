@@ -87,7 +87,7 @@ var ControlesLayer = cc.Layer.extend({
 
                 if (estadoJuego == AGARRAR_BLOQUE) {
                     if (keyCode == 32) { // Espacio
-                        estadoJuego = AGARRANDO_BLOQUE;
+                        estadoJuego = AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE;
                     }
                 }
 
@@ -145,7 +145,7 @@ var ControlesLayer = cc.Layer.extend({
 
             if (estadoJuego == AGARRAR_BLOQUE) {
                 if (cc.rectContainsPoint( areaBotonAgarrarSoltar, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                    estadoJuego = AGARRANDO_BLOQUE;
+                    estadoJuego = AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE;
                 }
             }
 
@@ -264,11 +264,14 @@ var ControlesLayer = cc.Layer.extend({
 
         if (estadoJuego == SOLTAR_BLOQUE) {
             instancia = this.getParent().getChildByTag(idCapaJuego);
+
             var tiempoActual = new Date().getTime();
             var tiempo = instancia.tiempoLimiteColocacion - (tiempoActual - instancia.tiempoInicialBloque);
-            if(tiempo>0){
+
+            if (tiempo > 0) {
                 this.tiempoRestante=tiempo;
             }
+
             this.indicadorTiempo.setString("Tiempo restante: " + Math.round(this.tiempoRestante/1000));
         }
     }

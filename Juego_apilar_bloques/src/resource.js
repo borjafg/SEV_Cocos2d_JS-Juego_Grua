@@ -18,7 +18,6 @@ var res = {
     joypad_left_png : "res/pad_left.png",
     joypad_right_png : "res/pad_right.png",
     joypad_drag_drop_png : "res/pad_drag_and_drop.png",
-    joypad_png : "res/joypad.png",
 
     figura_cuadrado_png : "res/figura_cuadrado.png",
     figura_triangulo_png : "res/figura_triangulo.png",

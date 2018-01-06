@@ -3,13 +3,14 @@
 // ----------------------
 
 var AGARRAR_BLOQUE = 0;
-var AGARRANDO_BLOQUE = 1;
-var AGARRANDO_BLOQUE_VOLVER = 2;
+var AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE = 1;
+var AGARRANDO_BLOQUE_SUBIR_BLOQUE = 2;
+var AGARRANDO_BLOQUE_MOVER_GRUA_CENTRO = 3;
 
-var SOLTAR_BLOQUE = 3;
-var SOLTANDO_BLOQUE = 4;
+var SOLTAR_BLOQUE = 4;
+var SOLTANDO_BLOQUE = 5;
 
-var TODOS_BLOQUES_COLOCADOS = 5;
+var TODOS_BLOQUES_COLOCADOS = 6;
 
 var estadoJuego = AGARRAR_BLOQUE;
 
@@ -102,6 +103,7 @@ var GameLayer = cc.Layer.extend({
     formasEliminar: [],
 
     bloqueGenerado: null,
+    bloqueGenerado_velSubida: null,
 
     grua_moverIzquierda: null,
     grua_moverDerecha: null,
@@ -182,12 +184,13 @@ var GameLayer = cc.Layer.extend({
         numeroBloquesQuedan = bloquesGenerar_actual;
 
         this.spriteGrua_velX = 3;
+        this.bloqueGenerado_velSubida = 2;
 
         this.grua_moverIzquierda = false;
         this.grua_moverDerecha = false;
 
-        this.inicializarPlataformas();
         this.inicializarGrua();
+        this.inicializarPlataformas();
         this.generarBloqueAleatorio();
 
         estadoJuego = AGARRAR_BLOQUE;
@@ -219,8 +222,7 @@ var GameLayer = cc.Layer.extend({
     inicializarGrua: function() {
         this.spriteGrua = cc.Sprite.create(res.grua_png);
 
-        this.spriteGrua.setScale(0.2);
-        this.spriteGrua.setPosition(cc.p(cc.winSize.width * 0.5, cc.winSize.height * 0.9));
+        this.spriteGrua.setPosition(cc.p(cc.winSize.width * 0.5, cc.winSize.height - this.spriteGrua.height / 2));
 
         this.addChild(this.spriteGrua);
     },
@@ -251,7 +253,8 @@ var GameLayer = cc.Layer.extend({
         var spritePlataformaGen = new cc.PhysicsSprite(res.barra2_png);
 
         var body2 = new cp.StaticBody();
-        body2.p = cc.p(cc.winSize.width * 0.13, cc.winSize.height * 0.75);
+
+        body2.p = cc.p(cc.winSize.width * 0.13, this.spriteGrua.y - this.spriteGrua.height / 2 - 60);
         spritePlataformaGen.setBody(body2);
 
         var shape2 = new cp.BoxShape(body2, spritePlataformaGen.width, spritePlataformaGen.height);
@@ -318,6 +321,10 @@ var GameLayer = cc.Layer.extend({
         this.bloqueGenerado.setPosition(cc.p(this.bloqueGenerado.x + desplX, this.bloqueGenerado.y));
     },
 
+    subirBloqueGenerado: function(desplY) {
+        this.bloqueGenerado.setPosition(cc.p(this.bloqueGenerado.x, this.bloqueGenerado.y + desplY));
+    },
+
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Actualizar el juego
@@ -327,7 +334,7 @@ var GameLayer = cc.Layer.extend({
         this.space.step(dt);
 
         // ------------------------------------------
-        // Comrpobar si quedan bloques que colocar
+        // Comprobar si quedan bloques que colocar
         // ------------------------------------------
 
         if (estadoJuego == TODOS_BLOQUES_COLOCADOS) {
@@ -397,14 +404,33 @@ var GameLayer = cc.Layer.extend({
         // Colocar la grúa encima del bloque
         // --------------------------------------------------
 
-        else if (estadoJuego == AGARRANDO_BLOQUE) {
+        else if (estadoJuego == AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE) {
             if (this.spriteGrua.x - this.spriteGrua_velX > this.bloqueGenerado.x) {
                 this.moverGrua(-this.spriteGrua_velX);
             }
 
             else {
                 this.moverGrua(this.bloqueGenerado.x - this.spriteGrua.x);
-                estadoJuego = AGARRANDO_BLOQUE_VOLVER;
+                estadoJuego = AGARRANDO_BLOQUE_SUBIR_BLOQUE;
+            }
+        }
+
+
+        // -----------------------------------
+        // Subir el bloque hasta la grúa
+        // -----------------------------------
+
+        else if(estadoJuego == AGARRANDO_BLOQUE_SUBIR_BLOQUE) {
+            var posFinalBloque = this.spriteGrua.y - this.spriteGrua.height / 2 - this.bloqueGenerado.height / 2;
+
+            if (this.bloqueGenerado.y + this.bloqueGenerado_velSubida < posFinalBloque) {
+                this.subirBloqueGenerado(this.bloqueGenerado_velSubida);
+            }
+
+            else {
+                this.subirBloqueGenerado(posFinalBloque - this.bloqueGenerado.y);
+
+                estadoJuego = AGARRANDO_BLOQUE_MOVER_GRUA_CENTRO;
             }
         }
 
@@ -413,7 +439,7 @@ var GameLayer = cc.Layer.extend({
         // Llevar la grua al centro con el bloque generado
         // --------------------------------------------------
 
-        if (estadoJuego == AGARRANDO_BLOQUE_VOLVER) {
+        else if (estadoJuego == AGARRANDO_BLOQUE_MOVER_GRUA_CENTRO) {
             if (this.spriteGrua.x + this.spriteGrua_velX < cc.winSize.width * 0.5) {
                 this.moverGrua(this.spriteGrua_velX);
                 this.moverBloqueGenerado(this.spriteGrua_velX);
