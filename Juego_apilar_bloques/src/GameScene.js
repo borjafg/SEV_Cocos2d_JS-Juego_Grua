@@ -97,7 +97,7 @@ var GameLayer = cc.Layer.extend({
     spriteGrua_velX: null,
 
     tiempoInicialBloque: null,
-    tiempoLimiteColocacion: 5000,
+    tiempoLimiteColocacion: null,
 
     arrayBloques: [],
     formasEliminar: [],
@@ -107,6 +107,10 @@ var GameLayer = cc.Layer.extend({
 
     grua_moverIzquierda: null,
     grua_moverDerecha: null,
+
+    lineaPowerUp: null,
+    powerUpActivo: null,   // Tiene el PowerUp ahora
+    powerUpObtenido: null, // Tuvo el PowerUp en algún momento
 
 
     ctor:function () {
@@ -183,8 +187,13 @@ var GameLayer = cc.Layer.extend({
 
         numeroBloquesQuedan = bloquesGenerar_actual;
 
+        this.powerUpActivo = false;
+        this.powerUpObtenido = false;
+
         this.spriteGrua_velX = 3;
         this.bloqueGenerado_velSubida = 2;
+
+        this.tiempoLimiteColocacion = 6000;
 
         this.grua_moverIzquierda = false;
         this.grua_moverDerecha = false;
@@ -194,6 +203,23 @@ var GameLayer = cc.Layer.extend({
         this.generarBloqueAleatorio();
 
         estadoJuego = AGARRAR_BLOQUE;
+
+        // --------------------------------------------
+        // Dibujar la línea que indica a la altura
+        // la que se activa el PowerUp
+        // --------------------------------------------
+
+        this.dibujarLineaPowerUp();
+
+        // ------------------------------
+        // Añadir eventos
+        // ------------------------------
+
+        cc.eventManager.addListener({
+                event: cc.EventListener.MOUSE,
+                onMouseDown: this.procesarMouseDown
+            }, this)
+
 
         // ----------------------------
         // Actualizar el juego
@@ -205,17 +231,47 @@ var GameLayer = cc.Layer.extend({
     },
 
 
-    collisionBloqueConMuro: function(arbiter, space) {
-        var controles = this.getParent().getChildByTag(idCapaControles);
+    // -------------------------
+    // Evwentos
+    // -------------------------
 
-        if(controles.restarVida() == 0) {
-            cc.director.runScene(new GameScene());
-        }
+    procesarMouseDown: function(event) {
+        //if (powerUpActivo) {
+            var i;
+            var areaBloque;
+            var shape;
 
-        var shapes = arbiter.getShapes();
+            instancia = event.getCurrentTarget();
 
-        // shapes[0] es el muro
-        this.formasEliminar.push(shapes[1]);
+            for(index = 0; index < instancia.arrayBloques.length; index++) {
+                shape = instancia.arrayBloques[index].body.shapeList[0];
+
+                //if () {
+                //    //this.formasEliminar.push(shapes[0]);
+                //    console.log("Eliminado un bloque");
+                //}
+            }
+        //}
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Métodos para inicializar el juego
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    dibujarLineaPowerUp: function() {
+        this.lineaPowerUp = new cc.DrawNode();
+
+        var size = cc.winSize;
+
+        var puntoInicial = cc.p(0, size.height * 0.4);
+        var puntoFinal = cc.p(size.width, size.height * 0.4);
+        var grosor = 3;
+        var colorLinea = new cc.Color(9, 60, 68, 100);
+
+        this.lineaPowerUp.drawSegment(puntoInicial, puntoFinal, grosor, colorLinea);
+
+        this.addChild(this.lineaPowerUp);
     },
 
 
@@ -264,6 +320,24 @@ var GameLayer = cc.Layer.extend({
         this.addChild(spritePlataformaGen);
 
         this.spritePlataformaGeneracion = spritePlataformaGen;
+    },
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Otros métodos
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    collisionBloqueConMuro: function(arbiter, space) {
+        var controles = this.getParent().getChildByTag(idCapaControles);
+
+        if(controles.restarVida() == 0) {
+            cc.director.runScene(new GameScene());
+        }
+
+        var shapes = arbiter.getShapes();
+
+        // shapes[0] es el muro
+        this.formasEliminar.push(shapes[1]);
     },
 
 
@@ -448,8 +522,10 @@ var GameLayer = cc.Layer.extend({
             else {
                 this.moverGrua(cc.winSize.width * 0.5 - this.spriteGrua.x);
                 this.moverBloqueGenerado(cc.winSize.width * 0.5 - this.spriteGrua.x);
+
                 estadoJuego = SOLTAR_BLOQUE;
                 this.tiempoInicialBloque = new Date().getTime();
+
                 var controles = this.getParent().getChildByTag(idCapaControles);
                 controles.addChild(controles.indicadorTiempo);
             }

@@ -65,8 +65,6 @@ var ControlesLayer = cc.Layer.extend({
         this.indicadorTiempo.fillStyle = new cc.Color(255, 255, 255, 255);
 
 
-
-
         // --------------------------
         // Añadir listeners
         // --------------------------
