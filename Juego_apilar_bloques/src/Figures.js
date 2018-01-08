@@ -9,6 +9,52 @@ var FIGURA_CIRCULO = 3;
 var FIGURA_TRIANGULO = 4;
 
 
+var polyContainsPoint = function(verts, px, py) {
+    var numVertices = p.length >> 1;
+
+    var ax, ay = p[2 * numVertices - 3] - py, bx = p[2 * numVertices - 2] - px, by = p[ 2 * numVertices - 1] - py;
+
+    //var lup = by > ay;
+    for (var i = 0; i < numVertices; i++) {
+        ax = bx;  ay = by;
+        bx = p[2 * i] - px;
+        by = p[2 * i + 1] - py;
+
+        if (ay == by)
+            continue;
+
+        lup = by > ay;
+    }
+
+    var depth = 0;
+
+    for (var i = 0; i < numVertices; i++) {
+        ax = bx;  ay = by;
+        bx = p[2 * i] - px;
+        by = p[2 * i + 1] - py;
+
+        if (ay < 0 && by < 0) continue;	 // ambos "arriba" o ambos "abajo"
+        if (ay > 0 && by > 0) continue;	 // ambos "arriba" or both "abajo"
+        if (ax < 0 && bx < 0) continue;  // ambos puntos a la izquierda
+
+        if (ay == by && Math.min(ax,bx) <= 0) return true;
+        if (ay == by) continue;
+
+        var lx = ax + (bx - ax) * (-ay) / (by - ay);
+
+        if (lx == 0) return true;  // point on edge
+        if (lx > 0) depth++;
+        if (ay == 0 && lup && by > ay) depth--;	 // hit vertex, both up
+        if (ay == 0 && !lup && by < ay) depth--; // hit vertex, both down
+
+        lup = by > ay;
+    }
+
+    //console.log(depth);
+    return (depth & 1) == 1;
+};
+
+
 generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espacio, capaJuego) {
 
     var spriteFigura;
@@ -34,6 +80,12 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             spriteFigura.setBody(body);
 
             shape = new cp.BoxShape(body, spriteFigura.width, spriteFigura.height);
+
+            spriteFigura.containsPoint = function(puntoX, puntoY) {
+                //if(polyContainsPoint(this.)) {
+
+                //}
+            };
 
             break;
 
