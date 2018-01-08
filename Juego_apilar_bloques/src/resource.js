@@ -14,6 +14,9 @@ var res = {
     grua_png : "res/grua.png",
 
     boton_jugar_png : "res/boton_jugar.png",
+    boton_reanudar_png : "res/boton_reanudar.png",
+    boton_siguiente_png : "res/boton_siguiente.png",
+    boton_boton_volver_jugar_png : "res/boton_volver_jugar.png",
 
     joypad_left_png : "res/pad_left.png",
     joypad_right_png : "res/pad_right.png",
@@ -23,14 +26,17 @@ var res = {
     figura_triangulo_png : "res/figura_triangulo.png",
     figura_circulo_png : "res/figura_circulo.png",
     figura_barra_horizontal_png : "res/figura_barra_horizontal.png",
-    figura_barra_vertical_png : "res/figura_barra_vertical.png",
-
-    animacioncirculo_png : "res/animacion_circulo.png",
-    animacioncirculo_plist : "res/animacion_circulo.plist"
+    figura_barra_vertical_png : "res/figura_barra_vertical.png"
 };
 
 var g_resources = [];
 
 for (var i in res) {
     g_resources.push(res[i]);
+}
+
+
+var res_aux = {
+    barra_aux_1 : "res/barra_",
+    barra_aux_2 : ".png",
 }

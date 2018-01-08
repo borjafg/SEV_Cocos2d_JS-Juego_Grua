@@ -16,6 +16,9 @@
         "src/app.js",
         "src/GameScene.js",
         "src/ControlesLayer.js",
+        "src/VictoryLayer.js",
+        "src/GameOverLayer.js",
+        "src/LastLevelLayer.js",
         "src/Figures.js"
     ]
 
