@@ -82,7 +82,6 @@ var idCapaJuego = 1;
 var idCapaControles = 2;
 
 
-
 // ======================================
 // Capa de la escena
 // ======================================
@@ -92,16 +91,12 @@ var GameLayer = cc.Layer.extend({
     space: null,
 
     spritePlataformaGeneracion: null,
-    spritePlataformaMovil: null,
 
     spriteGrua: null,
     spriteGrua_velX: null,
 
     tiempoInicialBloque: null,
     tiempoLimiteColocacion: null,
-
-    mover_plataformaObstaculo: null,
-    velocidadPlataforma: null,
 
     arrayBloques: [],
     formasEliminar: [],
@@ -327,25 +322,6 @@ var GameLayer = cc.Layer.extend({
         this.addChild(spritePlataformaGen);
 
         this.spritePlataformaGeneracion = spritePlataformaGen;
-
-        // ----------------------------------------
-        // Plataforma movil
-        // ----------------------------------------
-
-        var spritePlataformaMov = new cc.PhysicsSprite(res.barra1_png);
-
-        var body3 = new cp.Body(1, cp.momentForBox(1, spritePlataformaMov.width, spritePlataformaMov.height));
-
-        body3.p = cc.p(cc.winSize.width * 0.5, cc.winSize.height * 0.75);
-        spritePlataformaMov.setBody(body3);
-
-        var shape3 = new cp.BoxShape(body3, spritePlataformaMov.width, spritePlataformaMov.height);
-        shape3.setFriction(0.9);
-        this.space.addShape(shape3);
-
-        this.addChild(spritePlataformaMov);
-
-        this.spritePlataformaMovil = spritePlataformaMov;
     },
 
 
@@ -413,9 +389,9 @@ var GameLayer = cc.Layer.extend({
     },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Mover la grua y el bloque generado
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~------------------
+    // Mover la grua, el bloque generado y la plataforma móvil
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~------------------
 
     moverGrua: function(desplX) {
         this.spriteGrua.setPosition(cc.p(this.spriteGrua.x + desplX, this.spriteGrua.y));
@@ -427,6 +403,10 @@ var GameLayer = cc.Layer.extend({
 
     subirBloqueGenerado: function(desplY) {
         this.bloqueGenerado.setPosition(cc.p(this.bloqueGenerado.x, this.bloqueGenerado.y + desplY));
+    },
+
+    moverPlataformaMovil: function(desplX) {
+        this.spritePlataformaMovil.body.setPos(cc.p(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
     },
 
 
@@ -497,48 +477,6 @@ var GameLayer = cc.Layer.extend({
     update: function(dt) {
         this.space.step(dt);
 
-        // ---------------------------
-        // Movimiento de la plataforma movil
-        // ---------------------------
-
-        if (this.mover_plataformaObstaculo) {
-            var limiteIzquierda = cc.winSize.width * 0.2;
-
-            if (this.spritePlataformaMovil.x - this.spriteGrua_velX > limiteIzquierda) {
-                desplX = -this.spriteGrua_velX;
-
-                this.spritePlataformaMovil.setPosition(cc.p(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-                //this.spritePlataformaMovil.body.setPos(new cp.Vect(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-            }
-
-            else {
-                desplX = limiteIzquierda - this.spritePlataformaMovil.x;
-
-                this.spritePlataformaMovil.setPosition(cc.p(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-                //this.spritePlataformaMovil.body.setPos(new cp.Vect(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-                this.mover_plataformaObstaculo=false;
-            }
-        }
-
-        else{
-            var limiteDerecha = cc.winSize.width * 0.9;
-            if (this.spritePlataformaMovil.x + this.spriteGrua_velX < limiteDerecha) {
-                desplX = this.spriteGrua_velX;
-
-                this.spritePlataformaMovil.setPosition(cc.p(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-                //this.spritePlataformaMovil.body.setPos(new cp.Vect(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-            }
-
-            else {
-                desplX = limiteDerecha - this.spritePlataformaMovil.x;
-
-                this.spritePlataformaMovil.setPosition(cc.p(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-                //this.spritePlataformaMovil.body.setPos(new cp.Vect(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
-                this.mover_plataformaObstaculo=true;
-            }
-
-        }
-
         // ------------------------------------------
         // Comprobar si quedan bloques que colocar
         // ------------------------------------------
@@ -546,7 +484,6 @@ var GameLayer = cc.Layer.extend({
         if (estadoJuego == TODOS_BLOQUES_COLOCADOS) {
             this.accionVictoriaJuego();
         }
-
 
         else if (estadoJuego == SOLTAR_BLOQUE) {
             // -------------------------------------------------------------
