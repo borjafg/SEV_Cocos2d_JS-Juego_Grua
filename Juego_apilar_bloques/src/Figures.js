@@ -101,7 +101,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             break;
 
 
-        case FIGURA_RECTANGULO_HORIZONTAL:
+        /*case FIGURA_RECTANGULO_HORIZONTAL:
             console.log("==> Generado un rectángulo horizontal");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_barra_horizontal_png);
@@ -236,7 +236,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             };
 
             break;
-
+*/
 
         default:
             console.log("==> Figura desconocida: generando un cuadrado");

@@ -250,6 +250,8 @@ var GameLayer = cc.Layer.extend({
 
                 if (figura.containsPoint(event.getLocationX(), event.getLocationY())) {
                     instancia.powerUpActivo = false;
+                    var controles = instancia.getParent().getChildByTag(idCapaControles);
+                    controles.removeChild(controles.indicadorPowerUp);
                     instancia.formasEliminar.push(figura.body.shapeList[0]);
                     console.log("Eliminado un bloque --> " + figura.tipoFigura);
                 }
@@ -412,6 +414,8 @@ var GameLayer = cc.Layer.extend({
             if (!this.powerUpObtenido) { // Si no se consiguió antes un PowerUp
                 this.powerUpActivo = true;
                 this.powerUpObtenido = true;
+                var controles = this.getParent().getChildByTag(idCapaControles);
+                controles.addChild(controles.indicadorPowerUp);
                 console.log("Entró en el powerUp");
             }
         }

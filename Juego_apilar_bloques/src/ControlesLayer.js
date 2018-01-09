@@ -12,6 +12,7 @@ var ControlesLayer = cc.Layer.extend({
     indicadorNivel: null,
     indicadorBloquesNoColocados: null,
     indicadorTiempo: null,
+    indicadorPowerUp: null,
 
     botonDcha: null,
     botonIzda: null,
@@ -63,6 +64,10 @@ var ControlesLayer = cc.Layer.extend({
         this.indicadorTiempo = new cc.LabelTTF("", "Helvetica", 17);
         this.indicadorTiempo.setPosition(cc.p(size.width - 110, size.height - 80));
         this.indicadorTiempo.fillStyle = new cc.Color(255, 255, 255, 255);
+
+        this.indicadorPowerUp = new cc.LabelTTF("PowerUp eliminar figura activado", "Helvetica", 17);
+        this.indicadorPowerUp.setPosition(cc.p(size.width * 0.1, size.height - 20));
+        this.indicadorPowerUp.fillStyle = new cc.Color(255, 255, 255, 255);
 
 
         // --------------------------
@@ -213,10 +218,6 @@ var ControlesLayer = cc.Layer.extend({
         return this.vidasQuedan;
     },
 
-    actualizarTiempoRestante: function(){
-
-    },
-
 
     indicarBloqueColocado: function() {
         numeroBloquesQuedan--;
@@ -272,6 +273,8 @@ var ControlesLayer = cc.Layer.extend({
 
             this.indicadorTiempo.setString("Tiempo restante: " + Math.round(this.tiempoRestante/1000));
         }
+
+
     }
 
 });
