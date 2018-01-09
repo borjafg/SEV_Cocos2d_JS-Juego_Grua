@@ -28,7 +28,7 @@ var tipoLineaPowerUp = 4;
 // Número de bloques que hay que generar en un nivel
 // -----------------------------------------------------
 
-var bloquesGenerar_inicial = 10;
+var bloquesGenerar_inicial = 5;
 var bloquesGenerar_maximo = 15;
 
 var bloquesGenerar_actual = bloquesGenerar_inicial;
@@ -38,6 +38,30 @@ var bloquesGenerar_incrementarUnidades = 5;
 var numeroBloquesQuedan = bloquesGenerar_actual;
 var tiempoGeneracionBloques = 4000; // Generar un nuevo bloque cada X milisegundos
 
+// -----------------------------------------------------
+// Número de vidas que hay en un nivel
+// -----------------------------------------------------
+
+var numero_vidas_iniciales = 5;
+var numero_vidas_minimas = 1;
+
+var numero_vidas_actuales = numero_vidas_iniciales;
+var numero_vidas_reducirUnidades = 1;
+
+
+var vidas;
+
+// -----------------------------------------------------
+// Tiempo para colocar una figura en un nivel
+// -----------------------------------------------------
+
+var tiempoLimiteColocacion_inicial = 8000;
+var tiempoLimiteColocacion_minimo = 4000;
+
+var tiempoLimiteColocacion_actual = tiempoLimiteColocacion_inicial;
+var tiempoLimiteColocacion_decrementarUnidades = 1000;
+
+var tiempoLimiteColocacion;
 
 // ----------------------------------------------------------------
 // Tipo de bloques que se pueden generar (Hay 5 tipos de bloques)
@@ -65,7 +89,6 @@ var tamanioPlataforma = tamanioPlataforma_maximo;
 
 // La plataforma se reducirá cada X niveles
 var tamanioPlataforma_decrementarCadaNiveles = 1;
-
 
 // -------------------
 // Nivel actual
@@ -97,7 +120,6 @@ var GameLayer = cc.Layer.extend({
     spriteGrua_velX: null,
 
     tiempoInicialBloque: null,
-    tiempoLimiteColocacion: null,
 
     arrayBloques: [],
     formasEliminar: [],
@@ -179,6 +201,8 @@ var GameLayer = cc.Layer.extend({
         // ----------------------------------
 
         numeroBloquesQuedan = bloquesGenerar_actual;
+        tiempoLimiteColocacion = tiempoLimiteColocacion_actual;
+        vidas=numero_vidas_actuales;
 
         this.powerUpActivo = false;
         this.powerUpObtenido = false;
@@ -186,7 +210,6 @@ var GameLayer = cc.Layer.extend({
         this.spriteGrua_velX = 3;
         this.bloqueGenerado_velSubida = 2;
 
-        this.tiempoLimiteColocacion = 7000;
 
         this.grua_moverIzquierda = false;
         this.grua_moverDerecha = false;
@@ -479,6 +502,24 @@ var GameLayer = cc.Layer.extend({
                 bloquesGenerar_actual = bloquesGenerar_maximo;
             }
 
+            // Reducir el número de vidas del nivel
+            if (numero_vidas_actuales - numero_vidas_reducirUnidades >= numero_vidas_minimas) {
+                numero_vidas_actuales -= numero_vidas_reducirUnidades;
+            }
+
+            else {
+                numero_vidas_actuales = numero_vidas_minimas;
+            }
+
+            // Reducir el tiempo de colocación de la figura del nivel
+            if (tiempoLimiteColocacion_actual - tiempoLimiteColocacion_decrementarUnidades >= tiempoLimiteColocacion_minimo) {
+                tiempoLimiteColocacion_actual -= tiempoLimiteColocacion_decrementarUnidades;
+            }
+
+            else {
+                tiempoLimiteColocacion_actual = tiempoLimiteColocacion_minimo;
+            }
+
             // Mostrar la pntalla de Victoria
             this.getParent().addChild(new VictoryLayer());
         }
@@ -489,6 +530,8 @@ var GameLayer = cc.Layer.extend({
             tamanioPlataforma = tamanioPlataforma_maximo;
             baseGenerarBloques_actual = baseGenerarBloques_inicial;
             bloquesGenerar_actual = bloquesGenerar_inicial;
+            numero_vidas_actuales=numero_vidas_iniciales;
+            tiempoLimiteColocacion_actual=tiempoLimiteColocacion_inicial;
 
             // Cambiar por una pantalla de volver a jugar (el primer nivel)
             this.getParent().addChild(new LastLevelLayer());
@@ -525,7 +568,7 @@ var GameLayer = cc.Layer.extend({
 
             var tiempoActual = new Date().getTime();
 
-            if (tiempoActual - this.tiempoInicialBloque > this.tiempoLimiteColocacion){
+            if (tiempoActual - this.tiempoInicialBloque > tiempoLimiteColocacion){
                 var controles = this.getParent().getChildByTag(idCapaControles);
 
                 if (controles.restarVida() == 0) {

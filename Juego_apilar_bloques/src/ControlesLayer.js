@@ -4,8 +4,6 @@
 
 var ControlesLayer = cc.Layer.extend({
 
-    vidasQuedan: null,
-
     tiempoRestante: null,
 
     indicadorVidas: null,
@@ -33,7 +31,6 @@ var ControlesLayer = cc.Layer.extend({
         this.inicializarBotonesControl();
 
         this.soltarBloque = false;
-        this.vidasQuedan = 4;
 
         // ----------------------------------------------------------------
         // Añadir indicadores (vidas restantes, bloques sin colacar...)
@@ -55,7 +52,7 @@ var ControlesLayer = cc.Layer.extend({
         this.addChild(this.indicadorNivel);
 
 
-        this.indicadorVidas = new cc.LabelTTF("Vidas: " + this.vidasQuedan, "Helvetica", 17);
+        this.indicadorVidas = new cc.LabelTTF("Vidas: " + vidas, "Helvetica", 17);
         this.indicadorVidas.setPosition(cc.p(size.width - 110, size.height - 60));
         this.indicadorVidas.fillStyle = new cc.Color(255, 255, 255, 255);
 
@@ -212,10 +209,10 @@ var ControlesLayer = cc.Layer.extend({
 
 
     restarVida: function() {
-        this.vidasQuedan--;
-        this.indicadorVidas.setString("Vidas: " + this.vidasQuedan);
+        vidas--;
+        this.indicadorVidas.setString("Vidas: " + vidas);
 
-        return this.vidasQuedan;
+        return vidas;
     },
 
 
@@ -265,7 +262,7 @@ var ControlesLayer = cc.Layer.extend({
             instancia = this.getParent().getChildByTag(idCapaJuego);
 
             var tiempoActual = new Date().getTime();
-            var tiempo = instancia.tiempoLimiteColocacion - (tiempoActual - instancia.tiempoInicialBloque);
+            var tiempo = tiempoLimiteColocacion - (tiempoActual - instancia.tiempoInicialBloque);
 
             if (tiempo > 0) {
                 this.tiempoRestante=tiempo;

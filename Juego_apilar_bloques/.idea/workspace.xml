@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="8eaa7fd2-c617-4cd7-9b90-29c18a5dd9ab" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/ControlesLayer.js" afterPath="$PROJECT_DIR$/src/ControlesLayer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/Figures.js" afterPath="$PROJECT_DIR$/src/Figures.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/GameScene.js" afterPath="$PROJECT_DIR$/src/GameScene.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
@@ -27,21 +26,21 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="GameScene.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="GameScene.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/GameScene.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-43.6">
-              <caret line="252" column="45" selection-start-line="252" selection-start-column="45" selection-end-line="252" selection-end-column="45" />
+            <state vertical-scroll-proportion="0.6830509">
+              <caret line="545" column="6" selection-start-line="545" selection-start-column="6" selection-end-line="545" selection-end-column="6" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ControlesLayer.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="ControlesLayer.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/ControlesLayer.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.61376995">
-              <caret line="73" column="27" selection-start-line="73" selection-start-column="27" selection-end-line="73" selection-end-column="27" />
+            <state vertical-scroll-proportion="-25.529411">
+              <caret line="264" column="47" selection-start-line="264" selection-start-column="25" selection-end-line="264" selection-end-column="47" />
               <folding />
             </state>
           </provider>
@@ -83,8 +82,8 @@
         <option value="$PROJECT_DIR$/src/LastLevelLayer.js" />
         <option value="$PROJECT_DIR$/src/resource.js" />
         <option value="$PROJECT_DIR$/src/Figures.js" />
-        <option value="$PROJECT_DIR$/src/GameScene.js" />
         <option value="$PROJECT_DIR$/src/ControlesLayer.js" />
+        <option value="$PROJECT_DIR$/src/GameScene.js" />
       </list>
     </option>
   </component>
@@ -169,7 +168,7 @@
   <component name="PropertiesComponent">
     <property name="settings.editor.selected.configurable" value="editor.preferences.appearance" />
     <property name="settings.editor.splitter.proportion" value="0.2" />
-    <property name="last_opened_file_path" value="D:/Desktop/SWEV espacio de trabajo/tiraLaTorre" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../git/SEV_Cocos2d_JS-Juego_Grua/Juego_apilar_bloques" />
     <property name="FullScreen" value="false" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatWidth0" value="141" />
     <property name="FileHistory.git4idea.history.GitHistoryProvider_flatOrder0" value="0" />
@@ -812,18 +811,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/GameScene.js">
+    <entry file="file://$PROJECT_DIR$/src/ControlesLayer.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-43.6">
-          <caret line="252" column="45" selection-start-line="252" selection-start-column="45" selection-end-line="252" selection-end-column="45" />
+        <state vertical-scroll-proportion="-25.529411">
+          <caret line="264" column="47" selection-start-line="264" selection-start-column="25" selection-end-line="264" selection-end-column="47" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/ControlesLayer.js">
+    <entry file="file://$PROJECT_DIR$/src/GameScene.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.61376995">
-          <caret line="73" column="27" selection-start-line="73" selection-start-column="27" selection-end-line="73" selection-end-column="27" />
+        <state vertical-scroll-proportion="0.6830509">
+          <caret line="545" column="6" selection-start-line="545" selection-start-column="6" selection-end-line="545" selection-end-column="6" />
           <folding />
         </state>
       </provider>
