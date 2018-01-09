@@ -42,7 +42,7 @@ var polyContainsPoint = function(verts, px, py) {
         by = verts[2 * i + 1] - py;
 
         if (ay < 0 && by < 0) continue;	 // ambos "arriba" o ambos "abajo"
-        if (ay > 0 && by > 0) continue;	 // ambos "arriba" or both "abajo"
+        if (ay > 0 && by > 0) continue;	 // ambos "arriba" o ambos "abajo"
         if (ax < 0 && bx < 0) continue;  // ambos puntos a la izquierda
 
         if (ay == by && Math.min(ax, bx) <= 0) return true;
