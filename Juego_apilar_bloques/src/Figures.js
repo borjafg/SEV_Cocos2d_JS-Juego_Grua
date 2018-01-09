@@ -10,15 +10,21 @@ var FIGURA_TRIANGULO = 4;
 
 
 var polyContainsPoint = function(verts, px, py) {
-    var numVertices = p.length >> 1;
+    var numVertices = verts.length >> 1;
 
-    var ax, ay = p[2 * numVertices - 3] - py, bx = p[2 * numVertices - 2] - px, by = p[ 2 * numVertices - 1] - py;
+    var ax;
+    var ay = verts[2 * numVertices - 3] - py;
+    var bx = verts[2 * numVertices - 2] - px;
+    var by = verts[ 2 * numVertices - 1] - py;
 
-    //var lup = by > ay;
+    var lup;
+
     for (var i = 0; i < numVertices; i++) {
-        ax = bx;  ay = by;
-        bx = p[2 * i] - px;
-        by = p[2 * i + 1] - py;
+        ax = bx;
+        ay = by;
+
+        bx = verts[2 * i] - px;
+        by = verts[2 * i + 1] - py;
 
         if (ay == by)
             continue;
@@ -29,22 +35,24 @@ var polyContainsPoint = function(verts, px, py) {
     var depth = 0;
 
     for (var i = 0; i < numVertices; i++) {
-        ax = bx;  ay = by;
-        bx = p[2 * i] - px;
-        by = p[2 * i + 1] - py;
+        ax = bx;
+        ay = by;
+
+        bx = verts[2 * i] - px;
+        by = verts[2 * i + 1] - py;
 
         if (ay < 0 && by < 0) continue;	 // ambos "arriba" o ambos "abajo"
         if (ay > 0 && by > 0) continue;	 // ambos "arriba" or both "abajo"
         if (ax < 0 && bx < 0) continue;  // ambos puntos a la izquierda
 
-        if (ay == by && Math.min(ax,bx) <= 0) return true;
+        if (ay == by && Math.min(ax, bx) <= 0) return true;
         if (ay == by) continue;
 
         var lx = ax + (bx - ax) * (-ay) / (by - ay);
 
         if (lx == 0) return true;  // point on edge
         if (lx > 0) depth++;
-        if (ay == 0 && lup && by > ay) depth--;	 // hit vertex, both up
+        if (ay == 0 &&  lup && by > ay) depth--;	 // hit vertex, both up
         if (ay == 0 && !lup && by < ay) depth--; // hit vertex, both down
 
         lup = by > ay;
@@ -73,18 +81,21 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             console.log("==> Generado un cuadrado");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_cuadrado_png);
+            spriteFigura.tipoFigura = "Cuadrado";
 
             body = new cp.Body(1, cp.momentForBox(1, spriteFigura.width, spriteFigura.height));
 
-            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            body.p = new cp.Vect(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
             spriteFigura.setBody(body);
 
             shape = new cp.BoxShape(body, spriteFigura.width, spriteFigura.height);
 
             spriteFigura.containsPoint = function(puntoX, puntoY) {
-                //if(polyContainsPoint(this.)) {
+                if (polyContainsPoint(this.body.shapeList[0].tVerts, puntoX, puntoY)) {
+                    return true;
+                }
 
-                //}
+                return false;
             };
 
             break;
@@ -94,13 +105,22 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             console.log("==> Generado un rectángulo horizontal");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_barra_horizontal_png);
+            spriteFigura.tipoFigura = "Rectángulo horizontal";
 
             body = new cp.Body(1, cp.momentForBox(1, spriteFigura.width, spriteFigura.height));
 
-            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            body.p = new cp.Vect(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
             spriteFigura.setBody(body);
 
             shape = new cp.BoxShape(body, spriteFigura.width, spriteFigura.height);
+
+            spriteFigura.containsPoint = function(puntoX, puntoY) {
+                if (polyContainsPoint(this.body.shapeList[0].tVerts, puntoX, puntoY)) {
+                    return true;
+                }
+
+                return false;
+            };
 
             break;
 
@@ -109,13 +129,22 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             console.log("==> Generado un rectángulo vertical");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_barra_vertical_png);
+            spriteFigura.tipoFigura = "Rectángulo vertical";
 
             body = new cp.Body(1, cp.momentForBox(1, spriteFigura.width, spriteFigura.height));
 
-            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            body.p = new cp.Vect(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
             spriteFigura.setBody(body);
 
             shape = new cp.BoxShape(body, spriteFigura.width, spriteFigura.height);
+
+            spriteFigura.containsPoint = function(puntoX, puntoY) {
+                if (polyContainsPoint(this.body.shapeList[0].tVerts, puntoX, puntoY)) {
+                    return true;
+                }
+
+                return false;
+            };
 
             break;
 
@@ -124,6 +153,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             console.log("==> Generado un círculo");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_circulo_png);
+            spriteFigura.tipoFigura = "Círculo";
 
             // Momento de inercia del círculo:
             // -> Masa: 1
@@ -132,11 +162,24 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             // -> Offset (ver como se crea un triángulo)
             //
             body = new cp.Body(1, cp.momentForCircle(1, 0, spriteFigura.width / 2, cp.vzero));
-            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            body.p = new cp.Vect(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
 
             spriteFigura.setBody(body);
 
             shape = new cp.CircleShape(body, spriteFigura.width / 2, cp.vzero);
+
+            spriteFigura.containsPoint = function(puntoX, puntoY) {
+                var centro = this.body.getPos();
+                var radio = this.body.shapeList[0].r;
+
+                var distanciaCentroYpunto = Math.sqrt(Math.pow(centro.x - puntoX, 2) + Math.pow(centro.y - puntoY, 2));
+
+                if (distanciaCentroYpunto < radio) {
+                    return true;
+                }
+
+                return false;
+            };
 
             break;
 
@@ -145,6 +188,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             console.log("==> Generado un triángulo");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_triangulo_png);
+            spriteFigura.tipoFigura = "Triángulo";
 
             // Hay que definir los vértices en el
             // sentido de las agujas del reloj
@@ -177,12 +221,19 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             var offset = new cp.Vect(-spriteFigura.width / 2, -spriteFigura.height / 2);
 
             body = new cp.Body(1, cp.momentForPoly(1, vertices, cp.vzero));
-            body.p = cc.p(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
+            body.p = new cp.Vect(xPlataformaGeneracion, yPlataformaGeneracion + spriteFigura.height / 2);
 
             spriteFigura.setBody(body);
 
-
             shape = new cp.PolyShape(body, vertices, offset);
+
+            spriteFigura.containsPoint = function(puntoX, puntoY) {
+                if (polyContainsPoint(this.body.shapeList[0].tVerts, puntoX, puntoY)) {
+                    return true;
+                }
+
+                return false;
+            };
 
             break;
 

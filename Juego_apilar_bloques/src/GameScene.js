@@ -42,7 +42,7 @@ var tiempoGeneracionBloques = 4000; // Generar un nuevo bloque cada X milisegund
 // Tipo de bloques que se pueden generar (Hay 5 tipos de bloques)
 // ----------------------------------------------------------------
 
-var baseGenerarBloques_inicial = 60;
+var baseGenerarBloques_inicial = 100; // 60
 var baseGenerarBloques_maximo = 100;
 
 var baseGenerarBloques_actual = baseGenerarBloques_inicial;
@@ -200,7 +200,7 @@ var GameLayer = cc.Layer.extend({
         this.inicializarGrua();
         this.inicializarPlataformas();
         this.generarBloqueAleatorio();
-        this.mover_plataformaObstaculo=true;
+
         estadoJuego = AGARRAR_BLOQUE;
 
         // --------------------------------------------
@@ -214,11 +214,10 @@ var GameLayer = cc.Layer.extend({
         // Añadir eventos
         // ------------------------------
 
-        /*cc.eventManager.addListener({
+        cc.eventManager.addListener({
                 event: cc.EventListener.MOUSE,
                 onMouseDown: this.procesarMouseDown
-            }, this)*/
-
+            }, this)
 
         // ----------------------------
         // Actualizar el juego
@@ -234,27 +233,25 @@ var GameLayer = cc.Layer.extend({
     // Eventos
     // -------------------------
 
-    /*procesarMouseDown: function(event) {
-        //if (powerUpActivo) {
-            var i;
+    procesarMouseDown: function(event) {
+        var instancia = event.getCurrentTarget();
+
+        //if (instancia.powerUpActivo) {
+            var index;
             var areaBloque;
             var figura;
 
-            instancia = event.getCurrentTarget();
-            var puntoClick = cc.p(event.getLocationX(), event.getLocationY());
-
-            for(index = 0; index < instancia.arrayBloques.length; index++) {
+            for (index = 0; index < instancia.arrayBloques.length; index++) {
                 figura = instancia.arrayBloques[index]; //.body.shapeList[0];
 
-                //if () {
-                //    //this.formasEliminar.push(shapes[0]);
-                //    console.log("Eliminado un bloque");
-                //}
-
-                console.log(figura.containsPoint(puntoClick));
+                if (figura.containsPoint(event.getLocationX(), event.getLocationY())) {
+                    instancia.powerUpActivo = false;
+                    instancia.formasEliminar.push(figura.body.shapeList[0]);
+                    console.log("Eliminado un bloque --> " + figura.tipoFigura);
+                }
             }
         //}
-    },*/
+    },
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -272,6 +269,17 @@ var GameLayer = cc.Layer.extend({
         var colorLinea = new cc.Color(9, 60, 68, 100);
 
         this.lineaPowerUp.drawSegment(puntoInicial, puntoFinal, grosor, colorLinea);
+
+        /*var body = new cp.StaticBody();
+
+        body.p = new cp.Vect(puntoFinal.x - puntoFinal.x, puntoFinal.y - puntoFinal.y);
+        this.lineaPowerUp.setBody(body);
+
+        var shape = new cp.BoxShape(body, this.lineaPowerUp.width, this.lineaPowerUp.height);
+        shape.setFriction(1);
+        shape.setSensor(true);
+
+        this.space.addStaticShape(shape);*/
 
         this.addChild(this.lineaPowerUp);
     },
@@ -294,11 +302,13 @@ var GameLayer = cc.Layer.extend({
         var spritePlataforma = new cc.PhysicsSprite(res_aux.barra_aux_1 + tamanioPlataforma + res_aux.barra_aux_2);
 
         var body = new cp.StaticBody();
-        body.p = cc.p(cc.winSize.width * 0.5, spritePlataforma.height / 2 + 10);
+
+        body.p = new cp.Vect(cc.winSize.width * 0.5, spritePlataforma.height / 2 + 10);
         spritePlataforma.setBody(body);
 
         var shape = new cp.BoxShape(body, spritePlataforma.width, spritePlataforma.height);
         shape.setFriction(1);
+
         this.space.addStaticShape(shape);
 
         this.addChild(spritePlataforma);
@@ -312,7 +322,7 @@ var GameLayer = cc.Layer.extend({
 
         var body2 = new cp.StaticBody();
 
-        body2.p = cc.p(spritePlataformaGen.width / 2 + 20, this.spriteGrua.y - this.spriteGrua.height / 2 - 60);
+        body2.p = new cp.Vect(spritePlataformaGen.width / 2 + 20, this.spriteGrua.y - this.spriteGrua.height / 2 - 60);
         spritePlataformaGen.setBody(body2);
 
         var shape2 = new cp.BoxShape(body2, spritePlataformaGen.width, spritePlataformaGen.height);
@@ -386,6 +396,17 @@ var GameLayer = cc.Layer.extend({
 
         // shapes[0] es el muro
         this.formasEliminar.push(shapes[1]);
+    },
+
+
+    colisionBloqueConLineaPowerUp: function(arbiter, space) {
+        // Si ya se colocó el último bloque
+        if (estadoJuego == AGARRAR_BLOQUE) {
+            if (!this.powerUpObtenido) { // Si no se consiguió antes un PowerUp
+                this.powerUpActivo = true;
+                this.powerUpObtenido = true;
+            }
+        }
     },
 
 
