@@ -244,7 +244,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             return generarFigura(FIGURA_CUADRADO, plataformaGenereacionBloques, espacio, capaJuego);
     }
 
-    shape.setFriction(1);
+    shape.setFriction(1.1);
     shape.setCollisionType(tipoFigura);
 
     espacio.addShape(shape);

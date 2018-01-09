@@ -32,7 +32,7 @@ var ControlesLayer = cc.Layer.extend({
         this.inicializarBotonesControl();
 
         this.soltarBloque = false;
-        this.vidasQuedan = 1;
+        this.vidasQuedan = 4;
 
         // ----------------------------------------------------------------
         // Añadir indicadores (vidas restantes, bloques sin colacar...)

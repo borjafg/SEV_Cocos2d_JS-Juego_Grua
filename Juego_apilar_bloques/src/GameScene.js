@@ -21,13 +21,14 @@ var estadoJuego = AGARRAR_BLOQUE;
 
 var tipoMuro = 2;
 var tipoFigura = 3;
+var tipoLineaPowerUp = 4;
 
 
 // -----------------------------------------------------
 // Número de bloques que hay que generar en un nivel
 // -----------------------------------------------------
 
-var bloquesGenerar_inicial = 5;
+var bloquesGenerar_inicial = 10;
 var bloquesGenerar_maximo = 15;
 
 var bloquesGenerar_actual = bloquesGenerar_inicial;
@@ -173,13 +174,6 @@ var GameLayer = cc.Layer.extend({
 
         this.space.addStaticShape(muroAbajo);
 
-        // ------------------------------------------
-        // Añadir la gestión de las colisiones
-        // ------------------------------------------
-
-        // muro y bloque
-        this.space.addCollisionHandler(tipoMuro, tipoFigura, null, null, this.collisionBloqueConMuro.bind(this), null);
-
         // ----------------------------------
         // Inicializar elementos del juego
         // ----------------------------------
@@ -219,6 +213,16 @@ var GameLayer = cc.Layer.extend({
                 onMouseDown: this.procesarMouseDown
             }, this)
 
+        // ------------------------------------------
+        // Añadir la gestión de las colisiones
+        // ------------------------------------------
+
+        // muro y figura
+        this.space.addCollisionHandler(tipoMuro, tipoFigura, null, null, this.collisionFiguraConMuro.bind(this), null);
+
+        // línea y powerUp
+        this.space.addCollisionHandler(tipoLineaPowerUp, tipoFigura, null, this.collisionFiguraConLineaPowerUp.bind(this), null, null);
+
         // ----------------------------
         // Actualizar el juego
         // ----------------------------
@@ -236,7 +240,7 @@ var GameLayer = cc.Layer.extend({
     procesarMouseDown: function(event) {
         var instancia = event.getCurrentTarget();
 
-        //if (instancia.powerUpActivo) {
+        if (instancia.powerUpActivo) {
             var index;
             var areaBloque;
             var figura;
@@ -250,7 +254,7 @@ var GameLayer = cc.Layer.extend({
                     console.log("Eliminado un bloque --> " + figura.tipoFigura);
                 }
             }
-        //}
+        }
     },
 
 
@@ -270,18 +274,21 @@ var GameLayer = cc.Layer.extend({
 
         this.lineaPowerUp.drawSegment(puntoInicial, puntoFinal, grosor, colorLinea);
 
-        /*var body = new cp.StaticBody();
-
-        body.p = new cp.Vect(puntoFinal.x - puntoFinal.x, puntoFinal.y - puntoFinal.y);
-        this.lineaPowerUp.setBody(body);
-
-        var shape = new cp.BoxShape(body, this.lineaPowerUp.width, this.lineaPowerUp.height);
-        shape.setFriction(1);
-        shape.setSensor(true);
-
-        this.space.addStaticShape(shape);*/
-
         this.addChild(this.lineaPowerUp);
+
+        // ------------------------------------------------------------------------------
+        // Como el DrawNode no tiene físicas, colocamos encima de él una forma estática
+        // ------------------------------------------------------------------------------
+
+        var lineaPowerUpShape = new cp.SegmentShape(this.space.staticBody,
+            cp.v(puntoInicial.x, puntoInicial.y), // Punto de Inicio
+            cp.v(puntoFinal.x, puntoFinal.y), // Punto final
+            3); // Ancho del muro
+
+        lineaPowerUpShape.setCollisionType(tipoLineaPowerUp);
+        lineaPowerUpShape.setSensor(true);
+
+        this.space.addStaticShape(lineaPowerUpShape);
     },
 
 
@@ -385,7 +392,7 @@ var GameLayer = cc.Layer.extend({
     // Colisiones entre elementos del juego
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    collisionBloqueConMuro: function(arbiter, space) {
+    collisionFiguraConMuro: function(arbiter, space) {
         var controles = this.getParent().getChildByTag(idCapaControles);
 
         if(controles.restarVida() == 0) {
@@ -399,12 +406,13 @@ var GameLayer = cc.Layer.extend({
     },
 
 
-    colisionBloqueConLineaPowerUp: function(arbiter, space) {
-        // Si ya se colocó el último bloque
+    collisionFiguraConLineaPowerUp: function(arbiter, space) {
+        // Si ya se colocó la figura
         if (estadoJuego == AGARRAR_BLOQUE) {
             if (!this.powerUpObtenido) { // Si no se consiguió antes un PowerUp
                 this.powerUpActivo = true;
                 this.powerUpObtenido = true;
+                console.log("Entró en el powerUp");
             }
         }
     },
