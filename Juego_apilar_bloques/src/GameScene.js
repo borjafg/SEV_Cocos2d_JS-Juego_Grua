@@ -210,6 +210,8 @@ var GameLayer = cc.Layer.extend({
         numeroFigurasQuedan = figurasGenerar_actual;
         vidas = numero_vidas_actuales;
 
+        tiempoLimiteColocacion = tiempoLimiteColocacion_actual;
+
         this.powerUpActivo = false;
         this.powerUpObtenido = false;
 
