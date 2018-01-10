@@ -388,11 +388,11 @@ var GameLayer = cc.Layer.extend({
 
 
     generarFiguraAleatoria: function() {
-        /*var valorAleatorio = Math.floor(Math.random() * (baseGenerarFiguras_actual - 1)) + 1;
+        var valorAleatorio = Math.floor(Math.random() * (baseGenerarFiguras_actual - 1)) + 1;
 
-        if (valorAleatorio <= 20) { // Generar un cuadrado */
+        if (valorAleatorio <= 20) { // Generar un cuadrado
             this.figuraGenerada = generarFigura(FIGURA_CUADRADO,
-                this.spritePlataformaGeneracion, this.space, this); /*
+                this.spritePlataformaGeneracion, this.space, this);
         }
 
         else if (valorAleatorio <= 40) { // Generar un rectangulo en posición horizontal
@@ -418,7 +418,7 @@ var GameLayer = cc.Layer.extend({
         else { // En cualquier otro caso: generar un cuadrado
             this.figuraGenerada = generarFigura(FIGURA_CUADRADO,
                 this.spritePlataformaGeneracion, this.space, this);
-        } */
+        }
     },
 
 
