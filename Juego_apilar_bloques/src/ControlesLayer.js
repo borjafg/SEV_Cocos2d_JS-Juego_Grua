@@ -8,7 +8,7 @@ var ControlesLayer = cc.Layer.extend({
 
     indicadorVidas: null,
     indicadorNivel: null,
-    indicadorBloquesNoColocados: null,
+    indicadorFigurasNoColocadas: null,
     indicadorTiempo: null,
     indicadorPowerUp: null,
 
@@ -16,8 +16,8 @@ var ControlesLayer = cc.Layer.extend({
     botonIzda: null,
     botonAgarrarSoltar: null,
 
-    soltarBloque: null,
-    generarBloqueTiempoInicial: null,
+    soltarFigura: null,
+    generarFiguraTiempoInicial: null,
 
 
     ctor:function () {
@@ -30,41 +30,49 @@ var ControlesLayer = cc.Layer.extend({
 
         this.inicializarBotonesControl();
 
-        this.soltarBloque = false;
+        this.soltarFigura = false;
 
         // ----------------------------------------------------------------
-        // Añadir indicadores (vidas restantes, bloques sin colacar...)
+        // Añadir indicadores (vidas restantes, figuras sin colacar...)
         // ----------------------------------------------------------------
 
-        this.indicadorBloquesNoColocados =
-            new cc.LabelTTF("Quedan " + numeroBloquesQuedan + " bloques", "Helvetica", 17);
+        var posX_indicadores = size.width - 110;
 
-        this.indicadorBloquesNoColocados.setPosition(cc.p(size.width - 110, size.height - 20));
-        this.indicadorBloquesNoColocados.fillStyle = new cc.Color(255, 255, 255, 255);
 
-        this.addChild(this.indicadorBloquesNoColocados);
+        this.indicadorPowerUp = new cc.LabelTTF("PowerUp: No activo", "Helvetica", 17);
+        this.indicadorPowerUp.setPosition(cc.p(posX_indicadores, size.height - 20));
+        this.indicadorPowerUp.fillStyle = new cc.Color(255, 255, 255, 255);
+
+        this.addChild(this.indicadorPowerUp);
+
+
+        this.indicadorFigurasNoColocadas = new cc.LabelTTF("Coloca " + numeroFigurasQuedan + " figuras", "Helvetica", 17);
+
+        this.indicadorFigurasNoColocadas.setPosition(cc.p(posX_indicadores, size.height - 40));
+        this.indicadorFigurasNoColocadas.fillStyle = new cc.Color(255, 255, 255, 255);
+
+        this.addChild(this.indicadorFigurasNoColocadas);
 
 
         this.indicadorNivel = new cc.LabelTTF("Nivel actual: " + nivelActual, "Helvetica", 17);
-        this.indicadorNivel.setPosition(cc.p(size.width - 110, size.height - 40));
+        this.indicadorNivel.setPosition(cc.p(posX_indicadores, size.height - 60));
         this.indicadorNivel.fillStyle = new cc.Color(255, 255, 255, 255);
 
         this.addChild(this.indicadorNivel);
 
 
         this.indicadorVidas = new cc.LabelTTF("Vidas: " + vidas, "Helvetica", 17);
-        this.indicadorVidas.setPosition(cc.p(size.width - 110, size.height - 60));
+        this.indicadorVidas.setPosition(cc.p(posX_indicadores, size.height - 80));
         this.indicadorVidas.fillStyle = new cc.Color(255, 255, 255, 255);
 
         this.addChild(this.indicadorVidas);
 
+
         this.indicadorTiempo = new cc.LabelTTF("", "Helvetica", 17);
-        this.indicadorTiempo.setPosition(cc.p(size.width - 110, size.height - 80));
+        this.indicadorTiempo.setPosition(cc.p(posX_indicadores, size.height - 100));
         this.indicadorTiempo.fillStyle = new cc.Color(255, 255, 255, 255);
 
-        this.indicadorPowerUp = new cc.LabelTTF("PowerUp eliminar figura activado", "Helvetica", 17);
-        this.indicadorPowerUp.setPosition(cc.p(size.width * 0.1, size.height - 20));
-        this.indicadorPowerUp.fillStyle = new cc.Color(255, 255, 255, 255);
+        this.addChild(this.indicadorTiempo);
 
 
         // --------------------------
@@ -85,15 +93,15 @@ var ControlesLayer = cc.Layer.extend({
                 var instanciaCon = event.getCurrentTarget();
                 var instancia = instanciaCon.getParent().getChildByTag(idCapaJuego);
 
-                if (estadoJuego == AGARRAR_BLOQUE) {
+                if (estadoJuego == AGARRAR_FIGURA) {
                     if (keyCode == 32) { // Espacio
-                        estadoJuego = AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE;
+                        estadoJuego = AGARRANDO_FIGURA_MOVER_GRUA_A_FIGURA;
                     }
                 }
 
-                else if (estadoJuego == SOLTAR_BLOQUE) {
+                else if (estadoJuego == SOLTAR_FIGURA) {
                     if (keyCode == 32) { // Espacio
-                        instanciaCon.soltarBloque = true;
+                        instanciaCon.soltarFigura = true;
                     }
 
                     else if (keyCode == 37) { // Flecha izquierda
@@ -135,7 +143,7 @@ var ControlesLayer = cc.Layer.extend({
 
 
     procesarMouseDown: function(event) {
-        if (estadoJuego == AGARRAR_BLOQUE || estadoJuego == SOLTAR_BLOQUE) {
+        if (estadoJuego == AGARRAR_FIGURA || estadoJuego == SOLTAR_FIGURA) {
             var instanciaCon = event.getCurrentTarget();
             var instancia = instanciaCon.getParent().getChildByTag(idCapaJuego);
 
@@ -143,15 +151,15 @@ var ControlesLayer = cc.Layer.extend({
             var areaBotonDcha = instanciaCon.botonDcha.getBoundingBox();
             var areaBotonAgarrarSoltar = instanciaCon.botonAgarrarSoltar.getBoundingBox();
 
-            if (estadoJuego == AGARRAR_BLOQUE) {
+            if (estadoJuego == AGARRAR_FIGURA) {
                 if (cc.rectContainsPoint( areaBotonAgarrarSoltar, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                    estadoJuego = AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE;
+                    estadoJuego = AGARRANDO_FIGURA_MOVER_GRUA_A_FIGURA;
                 }
             }
 
-            else if (estadoJuego == SOLTAR_BLOQUE) {
+            else if (estadoJuego == SOLTAR_FIGURA) {
                 if (cc.rectContainsPoint( areaBotonAgarrarSoltar, cc.p(event.getLocationX(), event.getLocationY()) )) {
-                    instanciaCon.soltarBloque = true;
+                    instanciaCon.soltarFigura = true;
                 }
 
                 else if (cc.rectContainsPoint( areaBotonIzda, cc.p(event.getLocationX(), event.getLocationY()) )) {
@@ -163,9 +171,9 @@ var ControlesLayer = cc.Layer.extend({
                     instancia.grua_moverIzquierda = false;
                     instancia.grua_moverDerecha = true;
                 }
-            }   // Fin del else if  estado == SOLTAR_BLOQUE
+            }   // Fin del else if  estado == SOLTAR_FIGURA
+        }   // Fin del if  estado == AGARRAR_FIGURA || estaodo == SOLTAR_FIGURA
 
-        }   // Fin del if  estado == AGARRAR_BLOQUE || estaodo == SOLTAR_BLOQUE
     },
 
 
@@ -180,29 +188,37 @@ var ControlesLayer = cc.Layer.extend({
 
     inicializarBotonesControl: function() {
         // --------------------------------------
-        // Botón mover la grúa a la izquierda
-        // --------------------------------------
-
-        this.botonIzda = cc.Sprite.create(res.joypad_left_png);
-        this.botonIzda.setPosition(cc.p(cc.winSize.width * 0.7, cc.winSize.height * 0.25));
-
-        this.addChild(this.botonIzda);
-
-        // --------------------------------------
         // Botón mover la grúa a la derecha
         // --------------------------------------
 
         this.botonDcha = cc.Sprite.create(res.joypad_right_png);
-        this.botonDcha.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.25));
+        this.botonDcha.setPosition(cc.p(cc.winSize.width - this.botonDcha.width / 2 - 15, this.botonDcha.height / 2 + 25));
 
         this.addChild(this.botonDcha);
 
+        // --------------------------------------
+        // Botón mover la grúa a la izquierda
+        // --------------------------------------
+
+        this.botonIzda = cc.Sprite.create(res.joypad_left_png);
+
+        var posX_botonIzq = this.botonDcha.x - (this.botonDcha.width / 2) - (this.botonIzda.width / 2) - 10;
+        var posY_botonIzq = this.botonDcha.y;
+
+        this.botonIzda.setPosition(cc.p(posX_botonIzq, posY_botonIzq));
+
+        this.addChild(this.botonIzda);
+
         // --------------------------------
-        // Botón agarrar y soltar bloque
+        // Botón agarrar y soltar figura
         // --------------------------------
 
         this.botonAgarrarSoltar = cc.Sprite.create(res.joypad_drag_drop_png);
-        this.botonAgarrarSoltar.setPosition(cc.p(cc.winSize.width * 0.85, cc.winSize.height * 0.5));
+
+        var posX_btnAgarrar = this.botonDcha.x;
+        var posY_btnAgarrar = this.botonDcha.y + (this.botonDcha.width / 2) + (this.botonAgarrarSoltar.width / 2) + 10;
+
+        this.botonAgarrarSoltar.setPosition(cc.p(posX_btnAgarrar, posY_btnAgarrar));
 
         this.addChild(this.botonAgarrarSoltar);
     },
@@ -216,62 +232,60 @@ var ControlesLayer = cc.Layer.extend({
     },
 
 
-    indicarBloqueColocado: function() {
-        numeroBloquesQuedan--;
-        this.indicadorBloquesNoColocados.setString("Quedan " + numeroBloquesQuedan + " bloques");
+    indicarFiguraColocada: function() {
+        numeroFigurasQuedan--;
+        this.indicadorFigurasNoColocadas.setString("Coloca " + numeroFigurasQuedan + " figuras");
     },
 
 
     update: function(dt) {
-        if (this.soltarBloque) {
+        if (this.soltarFigura) {
             instancia = this.getParent().getChildByTag(idCapaJuego);
 
-            estadoJuego = SOLTANDO_BLOQUE;
+            estadoJuego = SOLTANDO_FIGURA;
 
-            this.removeChild(this.indicadorTiempo);
+            this.indicadorTiempo.setString("");
 
-            this.soltarBloque = false;
+            this.soltarFigura = false;
 
-            this.indicarBloqueColocado();
-            instancia.arrayBloques.push(instancia.bloqueGenerado);
+            this.indicarFiguraColocada();
+            instancia.arrayFiguras.push(instancia.figuraGenerada);
 
-            var body = instancia.bloqueGenerado.getBody();
+            var body = instancia.figuraGenerada.getBody();
             instancia.space.addBody(body);
 
-            this.generarBloqueTiempoInicial = new Date().getTime();
-        }   // Fin del if  this.soltarBloque
+            this.generarFiguraTiempoInicial = new Date().getTime();
+        }  // Fin del if  this.soltarFigura
 
 
-        // Esperamos para generar otro bloque después de soltar el anterior
-        if (estadoJuego == SOLTANDO_BLOQUE) {
+        // Esperamos para generar otra figura después de soltar el anterior
+        if (estadoJuego == SOLTANDO_FIGURA) {
             var tiempoActual = new Date().getTime();
 
-            if (tiempoActual > (this.generarBloqueTiempoInicial + tiempoGeneracionBloques)) {
-                if (numeroBloquesQuedan > 0) {
-                    instancia.generarBloqueAleatorio();
-                    estadoJuego = AGARRAR_BLOQUE;
+            if (tiempoActual > (this.generarFiguraTiempoInicial + tiempoGeneracionFiguras)) {
+                if (numeroFigurasQuedan > 0) {
+                    instancia.generarFiguraAleatoria();
+                    estadoJuego = AGARRAR_FIGURA;
                 }
 
                 else {
-                    estadoJuego = TODOS_BLOQUES_COLOCADOS;
+                    estadoJuego = TODAS_FIGURAS_COLOCADAS;
                 }
             }
-        }   // Fin del if  estadoJuego == SOLTANDO_BLOQUE
+        }   // Fin del if  estadoJuego == SOLTANDO_FIGURA
 
-        if (estadoJuego == SOLTAR_BLOQUE) {
+        if (estadoJuego == SOLTAR_FIGURA) {
             instancia = this.getParent().getChildByTag(idCapaJuego);
 
             var tiempoActual = new Date().getTime();
-            var tiempo = tiempoLimiteColocacion - (tiempoActual - instancia.tiempoInicialBloque);
+            var tiempo = tiempoLimiteColocacion - (tiempoActual - instancia.tiempoInicialFigura);
 
             if (tiempo > 0) {
-                this.tiempoRestante=tiempo;
+                this.tiempoRestante = tiempo;
             }
 
-            this.indicadorTiempo.setString("Tiempo restante: " + Math.round(this.tiempoRestante/1000));
+            this.indicadorTiempo.setString("Tiempo restante: " + Math.round(this.tiempoRestante / 1000));
         }
-
-
-    }
+    }   // Fin del método update
 
 });

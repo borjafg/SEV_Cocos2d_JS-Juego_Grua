@@ -63,17 +63,17 @@ var polyContainsPoint = function(verts, px, py) {
 };
 
 
-generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espacio, capaJuego) {
+generarFigura = function(tipoFiguraGenerar, plataformaGeneracionFiguras, espacio, capaJuego) {
 
     var spriteFigura;
     var body;
     var shape;
 
     // Coordenadas del centro de la parte superior
-    // de la plataforma de generación de bloques
+    // de la plataforma de generación de figuras
 
-    var xPlataformaGeneracion = plataformaGenereacionBloques.x;
-    var yPlataformaGeneracion = plataformaGenereacionBloques.y + plataformaGenereacionBloques.height / 2;
+    var xPlataformaGeneracion = plataformaGeneracionFiguras.x;
+    var yPlataformaGeneracion = plataformaGeneracionFiguras.y + plataformaGeneracionFiguras.height / 2;
 
 
     switch (tipoFiguraGenerar) {
@@ -101,7 +101,7 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             break;
 
 
-        /*case FIGURA_RECTANGULO_HORIZONTAL:
+        case FIGURA_RECTANGULO_HORIZONTAL:
             console.log("==> Generado un rectángulo horizontal");
 
             spriteFigura = new cc.PhysicsSprite(res.figura_barra_horizontal_png);
@@ -228,20 +228,20 @@ generarFigura = function(tipoFiguraGenerar, plataformaGenereacionBloques, espaci
             shape = new cp.PolyShape(body, vertices, offset);
 
             spriteFigura.containsPoint = function(puntoX, puntoY) {
-                if (polyContainsPoint(this.body.shapeList[0].tVerts, puntoX, puntoY)) {
-                    return true;
-                }
+                    if (polyContainsPoint(this.body.shapeList[0].tVerts, puntoX, puntoY)) {
+                        return true;
+                    }
 
-                return false;
-            };
+                    return false;
+                };
 
             break;
-*/
+
 
         default:
             console.log("==> Figura desconocida: generando un cuadrado");
 
-            return generarFigura(FIGURA_CUADRADO, plataformaGenereacionBloques, espacio, capaJuego);
+            return generarFigura(FIGURA_CUADRADO, plataformaGeneracionFiguras, espacio, capaJuego);
     }
 
     shape.setFriction(1.1);

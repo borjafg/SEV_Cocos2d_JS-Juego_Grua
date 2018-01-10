@@ -2,17 +2,17 @@
 // Estado del juego
 // ----------------------
 
-var AGARRAR_BLOQUE = 0;
-var AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE = 1;
-var AGARRANDO_BLOQUE_SUBIR_BLOQUE = 2;
-var AGARRANDO_BLOQUE_MOVER_GRUA_CENTRO = 3;
+var AGARRAR_FIGURA = 0;
+var AGARRANDO_FIGURA_MOVER_GRUA_A_FIGURA = 1;
+var AGARRANDO_FIGURA_SUBIR_FIGURA = 2;
+var AGARRANDO_FIGURA_MOVER_GRUA_CENTRO = 3;
 
-var SOLTAR_BLOQUE = 4;
-var SOLTANDO_BLOQUE = 5;
+var SOLTAR_FIGURA = 4;
+var SOLTANDO_FIGURA = 5;
 
-var TODOS_BLOQUES_COLOCADOS = 6;
+var TODAS_FIGURAS_COLOCADAS = 6;
 
-var estadoJuego = AGARRAR_BLOQUE;
+var estadoJuego;
 
 
 // ----------------------
@@ -25,18 +25,19 @@ var tipoLineaPowerUp = 4;
 
 
 // -----------------------------------------------------
-// Número de bloques que hay que generar en un nivel
+// Número de figuras que hay que generar en un nivel
 // -----------------------------------------------------
 
-var bloquesGenerar_inicial = 5;
-var bloquesGenerar_maximo = 15;
+var figurasGenerar_inicial = 4;
+var figurasGenerar_maximo = 8;
 
-var bloquesGenerar_actual = bloquesGenerar_inicial;
-var bloquesGenerar_incrementarUnidades = 5;
+var figurasGenerar_actual = figurasGenerar_inicial;
+var figurasGenerar_incrementarUnidades = 3;
 
 
-var numeroBloquesQuedan = bloquesGenerar_actual;
-var tiempoGeneracionBloques = 4000; // Generar un nuevo bloque cada X milisegundos
+var numeroFigurasQuedan = figurasGenerar_actual;
+var tiempoGeneracionFiguras = 4500; // Generar un nueva figura cada X milisegundos
+
 
 // -----------------------------------------------------
 // Número de vidas que hay en un nivel
@@ -46,10 +47,10 @@ var numero_vidas_iniciales = 5;
 var numero_vidas_minimas = 1;
 
 var numero_vidas_actuales = numero_vidas_iniciales;
-var numero_vidas_reducirUnidades = 1;
-
+var numero_vidas_reducirUnidades = 2;
 
 var vidas;
+
 
 // -----------------------------------------------------
 // Tiempo para colocar una figura en un nivel
@@ -63,22 +64,23 @@ var tiempoLimiteColocacion_decrementarUnidades = 1000;
 
 var tiempoLimiteColocacion;
 
+
 // ----------------------------------------------------------------
-// Tipo de bloques que se pueden generar (Hay 5 tipos de bloques)
+// Tipo de figuras que se pueden generar (Hay 5 tipos de figuras)
 // ----------------------------------------------------------------
 
-var baseGenerarBloques_inicial = 100; // 60
-var baseGenerarBloques_maximo = 100;
+var baseGenerarFiguras_inicial = 60;
+var baseGenerarFiguras_maximo = 100;
 
-var baseGenerarBloques_actual = baseGenerarBloques_inicial;
+var baseGenerarFiguras_actual = baseGenerarFiguras_inicial;
 
 // Cada 20 unidades puede generarse un nuevo tipo de figura
 // Este incremento se aplicará en cada cambio de nivel
-var baseGenerarBloques_incrementarUnidades = 20;
+var baseGenerarFiguras_incrementarUnidades = 20;
 
 
 // ----------------------------------------------------------------
-// Tamaño de la plataforma en la que hay que colocar los bloques
+// Tamaño de la plataforma en la que hay que colocar los figuras
 // ----------------------------------------------------------------
 
 var tamanioPlataforma_minimo = 1;
@@ -89,6 +91,7 @@ var tamanioPlataforma = tamanioPlataforma_maximo;
 
 // La plataforma se reducirá cada X niveles
 var tamanioPlataforma_decrementarCadaNiveles = 1;
+
 
 // -------------------
 // Nivel actual
@@ -114,18 +117,19 @@ var GameLayer = cc.Layer.extend({
 
     space: null,
 
+    spritePlataformaColocacion: null,
     spritePlataformaGeneracion: null,
 
     spriteGrua: null,
     spriteGrua_velX: null,
 
-    tiempoInicialBloque: null,
+    tiempoInicialFigura: null,
 
-    arrayBloques: [],
-    formasEliminar: [],
+    arrayFiguras: null,
+    formasEliminar: null,
 
-    bloqueGenerado: null,
-    bloqueGenerado_velSubida: null,
+    figuraGenerada: null,
+    figuraGenerada_velSubida: null,
 
     grua_moverIzquierda: null,
     grua_moverDerecha: null,
@@ -144,7 +148,7 @@ var GameLayer = cc.Layer.extend({
         // -----------------------
 
         this.space = new cp.Space();
-        this.space.gravity = cp.v(0,-350);
+        this.space.gravity = cp.v(0,-360);
 
         // ---------------
         // Depuración
@@ -200,25 +204,26 @@ var GameLayer = cc.Layer.extend({
         // Inicializar elementos del juego
         // ----------------------------------
 
-        numeroBloquesQuedan = bloquesGenerar_actual;
-        tiempoLimiteColocacion = tiempoLimiteColocacion_actual;
-        vidas=numero_vidas_actuales;
+        this.arrayFiguras = [];
+        this.formasEliminar = [];
+
+        numeroFigurasQuedan = figurasGenerar_actual;
+        vidas = numero_vidas_actuales;
 
         this.powerUpActivo = false;
         this.powerUpObtenido = false;
 
         this.spriteGrua_velX = 3;
-        this.bloqueGenerado_velSubida = 2;
-
+        this.figuraGenerada_velSubida = 2;
 
         this.grua_moverIzquierda = false;
         this.grua_moverDerecha = false;
 
         this.inicializarGrua();
         this.inicializarPlataformas();
-        this.generarBloqueAleatorio();
+        this.generarFiguraAleatoria();
 
-        estadoJuego = AGARRAR_BLOQUE;
+        estadoJuego = AGARRAR_FIGURA;
 
         // --------------------------------------------
         // Dibujar la línea que indica a la altura
@@ -264,19 +269,23 @@ var GameLayer = cc.Layer.extend({
         var instancia = event.getCurrentTarget();
 
         if (instancia.powerUpActivo) {
-            var index;
-            var areaBloque;
+            var indice;
             var figura;
 
-            for (index = 0; index < instancia.arrayBloques.length; index++) {
-                figura = instancia.arrayBloques[index]; //.body.shapeList[0];
+            for (indice = 0; indice < instancia.arrayFiguras.length; indice++) {
+                figura = instancia.arrayFiguras[indice];
 
                 if (figura.containsPoint(event.getLocationX(), event.getLocationY())) {
                     instancia.powerUpActivo = false;
+
                     var controles = instancia.getParent().getChildByTag(idCapaControles);
-                    controles.removeChild(controles.indicadorPowerUp);
+
+                    controles.indicadorPowerUp.setString("PowerUp: No activo");
                     instancia.formasEliminar.push(figura.body.shapeList[0]);
-                    console.log("Eliminado un bloque --> " + figura.tipoFigura);
+
+                    console.log("Se ha desactivado el PowerUp");
+                    console.log("Eliminada una figura -->  " + figura.tipoFigura);
+                    break;
                 }
             }
         }
@@ -291,9 +300,10 @@ var GameLayer = cc.Layer.extend({
         this.lineaPowerUp = new cc.DrawNode();
 
         var size = cc.winSize;
+        var lineaPowerUp_posY = this.spritePlataformaColocacion.y + (this.spritePlataformaColocacion.height / 2) + 90;
 
-        var puntoInicial = cc.p(0, size.height * 0.4);
-        var puntoFinal = cc.p(size.width, size.height * 0.4);
+        var puntoInicial = cc.p(0, lineaPowerUp_posY);
+        var puntoFinal = cc.p(size.width, lineaPowerUp_posY);
         var grosor = 3;
         var colorLinea = new cc.Color(9, 60, 68, 100);
 
@@ -328,7 +338,7 @@ var GameLayer = cc.Layer.extend({
 
     inicializarPlataformas: function() {
         // ----------------------------------------
-        // Plataforma de colocación de bloques
+        // Plataforma de colocación de figuras
         // ----------------------------------------
 
         var spritePlataforma = new cc.PhysicsSprite(res_aux.barra_aux_1 + tamanioPlataforma + res_aux.barra_aux_2);
@@ -339,15 +349,15 @@ var GameLayer = cc.Layer.extend({
         spritePlataforma.setBody(body);
 
         var shape = new cp.BoxShape(body, spritePlataforma.width, spritePlataforma.height);
-        shape.setFriction(1);
-
+        shape.setFriction(1.05);
         this.space.addStaticShape(shape);
 
         this.addChild(spritePlataforma);
+        this.spritePlataformaColocacion = spritePlataforma;
 
 
         // ----------------------------------------
-        // Plataforma de generación de bloques
+        // Plataforma de generación de figuras
         // ----------------------------------------
 
         var spritePlataformaGen = new cc.PhysicsSprite(res.barra1_png);
@@ -362,7 +372,6 @@ var GameLayer = cc.Layer.extend({
         this.space.addStaticShape(shape2);
 
         this.addChild(spritePlataformaGen);
-
         this.spritePlataformaGeneracion = spritePlataformaGen;
     },
 
@@ -378,38 +387,38 @@ var GameLayer = cc.Layer.extend({
     },
 
 
-    generarBloqueAleatorio: function() {
-        var valorAleatorio = Math.floor(Math.random() * (baseGenerarBloques_actual - 1)) + 1;
+    generarFiguraAleatoria: function() {
+        /*var valorAleatorio = Math.floor(Math.random() * (baseGenerarFiguras_actual - 1)) + 1;
 
-        if (valorAleatorio <= 20) { // Generar un cuadrado
-            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO,
-                this.spritePlataformaGeneracion, this.space, this);
+        if (valorAleatorio <= 20) { // Generar un cuadrado */
+            this.figuraGenerada = generarFigura(FIGURA_CUADRADO,
+                this.spritePlataformaGeneracion, this.space, this); /*
         }
 
         else if (valorAleatorio <= 40) { // Generar un rectangulo en posición horizontal
-            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_HORIZONTAL,
+            this.figuraGenerada = generarFigura(FIGURA_RECTANGULO_HORIZONTAL,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
         else if (valorAleatorio <= 60) { // Generar un círculo
-            this.bloqueGenerado = generarFigura(FIGURA_CIRCULO,
+            this.figuraGenerada = generarFigura(FIGURA_CIRCULO,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
         else if (valorAleatorio <= 80) { // Generar un rectángulo en posición vertical
-            this.bloqueGenerado = generarFigura(FIGURA_RECTANGULO_VERTICAL,
+            this.figuraGenerada = generarFigura(FIGURA_RECTANGULO_VERTICAL,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
         else if (valorAleatorio <= 100) { // Generar un triángulo
-            this.bloqueGenerado = generarFigura(FIGURA_TRIANGULO,
+            this.figuraGenerada = generarFigura(FIGURA_TRIANGULO,
                 this.spritePlataformaGeneracion, this.space, this);
         }
 
         else { // En cualquier otro caso: generar un cuadrado
-            this.bloqueGenerado = generarFigura(FIGURA_CUADRADO,
+            this.figuraGenerada = generarFigura(FIGURA_CUADRADO,
                 this.spritePlataformaGeneracion, this.space, this);
-        }
+        } */
     },
 
 
@@ -433,36 +442,34 @@ var GameLayer = cc.Layer.extend({
 
     collisionFiguraConLineaPowerUp: function(arbiter, space) {
         // Si ya se colocó la figura
-        if (estadoJuego == AGARRAR_BLOQUE) {
-            if (!this.powerUpObtenido) { // Si no se consiguió antes un PowerUp
+        if (estadoJuego == AGARRAR_FIGURA) {
+            if (!this.powerUpObtenido) { // Si todavía no consiguió un PowerUp
                 this.powerUpActivo = true;
                 this.powerUpObtenido = true;
+
                 var controles = this.getParent().getChildByTag(idCapaControles);
-                controles.addChild(controles.indicadorPowerUp);
-                console.log("Entró en el powerUp");
+
+                controles.indicadorPowerUp.setString("PowerUp: Activo");
+                console.log("Se activó el PowerUp");
             }
         }
     },
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~------------------
-    // Mover la grua, el bloque generado y la plataforma móvil
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~------------------
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Mover la grua y la figura generada
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     moverGrua: function(desplX) {
         this.spriteGrua.setPosition(cc.p(this.spriteGrua.x + desplX, this.spriteGrua.y));
     },
 
-    moverBloqueGenerado: function(desplX) {
-        this.bloqueGenerado.setPosition(cc.p(this.bloqueGenerado.x + desplX, this.bloqueGenerado.y));
+    moverFiguraGenerada: function(desplX) {
+        this.figuraGenerada.setPosition(cc.p(this.figuraGenerada.x + desplX, this.figuraGenerada.y));
     },
 
-    subirBloqueGenerado: function(desplY) {
-        this.bloqueGenerado.setPosition(cc.p(this.bloqueGenerado.x, this.bloqueGenerado.y + desplY));
-    },
-
-    moverPlataformaMovil: function(desplX) {
-        this.spritePlataformaMovil.body.setPos(cc.p(this.spritePlataformaMovil.x + desplX, this.spritePlataformaMovil.y));
+    subirFiguraGenerada: function(desplY) {
+        this.figuraGenerada.setPosition(cc.p(this.figuraGenerada.x, this.figuraGenerada.y + desplY));
     },
 
 
@@ -484,22 +491,22 @@ var GameLayer = cc.Layer.extend({
                 }
             }
 
-            // Aumentar el tipo de bloques que se pueden generar
-            if (baseGenerarBloques_actual + baseGenerarBloques_incrementarUnidades <= baseGenerarBloques_maximo) {
-                baseGenerarBloques_actual += baseGenerarBloques_incrementarUnidades;
+            // Aumentar la variedad de figuras que se pueden generar
+            if (baseGenerarFiguras_actual + baseGenerarFiguras_incrementarUnidades <= baseGenerarFiguras_maximo) {
+                baseGenerarFiguras_actual += baseGenerarFiguras_incrementarUnidades;
             }
 
             else {
-                baseGenerarBloques_actual = baseGenerarBloques_maximo;
+                baseGenerarFiguras_actual = baseGenerarFiguras_maximo;
             }
 
-            // Aumentar el número de bloques que se generan en el nivel
-            if (bloquesGenerar_actual + bloquesGenerar_incrementarUnidades <= bloquesGenerar_maximo) {
-                bloquesGenerar_actual += bloquesGenerar_incrementarUnidades;
+            // Aumentar el número de figuras que se generan en el nivel
+            if (figurasGenerar_actual + figurasGenerar_incrementarUnidades <= figurasGenerar_maximo) {
+                figurasGenerar_actual += figurasGenerar_incrementarUnidades;
             }
 
             else {
-                bloquesGenerar_actual = bloquesGenerar_maximo;
+                figurasGenerar_actual = figurasGenerar_maximo;
             }
 
             // Reducir el número de vidas del nivel
@@ -511,7 +518,7 @@ var GameLayer = cc.Layer.extend({
                 numero_vidas_actuales = numero_vidas_minimas;
             }
 
-            // Reducir el tiempo de colocación de la figura del nivel
+            // Reducir el tiempo que tiene el jugador para colocar la figura
             if (tiempoLimiteColocacion_actual - tiempoLimiteColocacion_decrementarUnidades >= tiempoLimiteColocacion_minimo) {
                 tiempoLimiteColocacion_actual -= tiempoLimiteColocacion_decrementarUnidades;
             }
@@ -528,10 +535,12 @@ var GameLayer = cc.Layer.extend({
         else {
             nivelActual = 1;
             tamanioPlataforma = tamanioPlataforma_maximo;
-            baseGenerarBloques_actual = baseGenerarBloques_inicial;
-            bloquesGenerar_actual = bloquesGenerar_inicial;
-            numero_vidas_actuales=numero_vidas_iniciales;
-            tiempoLimiteColocacion_actual=tiempoLimiteColocacion_inicial;
+
+            baseGenerarFiguras_actual = baseGenerarFiguras_inicial;
+            figurasGenerar_actual = figurasGenerar_inicial;
+
+            numero_vidas_actuales = numero_vidas_iniciales;
+            tiempoLimiteColocacion_actual = tiempoLimiteColocacion_inicial;
 
             // Cambiar por una pantalla de volver a jugar (el primer nivel)
             this.getParent().addChild(new LastLevelLayer());
@@ -553,22 +562,22 @@ var GameLayer = cc.Layer.extend({
     update: function(dt) {
         this.space.step(dt);
 
-        // ------------------------------------------
-        // Comprobar si quedan bloques que colocar
-        // ------------------------------------------
+        // --------------------------------------------
+        // Comprobar si quedan figuras que colocar
+        // --------------------------------------------
 
-        if (estadoJuego == TODOS_BLOQUES_COLOCADOS) {
+        if (estadoJuego == TODAS_FIGURAS_COLOCADAS) {
             this.accionVictoriaJuego();
         }
 
-        else if (estadoJuego == SOLTAR_BLOQUE) {
+        else if (estadoJuego == SOLTAR_FIGURA) {
             // -------------------------------------------------------------
-            // Comprobar si se le acabó el tiempo para colocar el bloque
+            // Comprobar si se le acabó el tiempo para colocar la figura
             // -------------------------------------------------------------
 
             var tiempoActual = new Date().getTime();
 
-            if (tiempoActual - this.tiempoInicialBloque > tiempoLimiteColocacion){
+            if (tiempoActual - this.tiempoInicialFigura > tiempoLimiteColocacion) {
                 var controles = this.getParent().getChildByTag(idCapaControles);
 
                 if (controles.restarVida() == 0) {
@@ -593,14 +602,14 @@ var GameLayer = cc.Layer.extend({
                     desplX = -this.spriteGrua_velX;
 
                     this.moverGrua(desplX);
-                    this.moverBloqueGenerado(desplX);
+                    this.moverFiguraGenerada(desplX);
                 }
 
                 else {
                     desplX = limiteIzquierda - this.spriteGrua.x;
 
                     this.moverGrua(desplX);
-                    this.moverBloqueGenerado(desplX);
+                    this.moverFiguraGenerada(desplX);
                 }
             }
 
@@ -611,14 +620,14 @@ var GameLayer = cc.Layer.extend({
                     desplX = this.spriteGrua_velX;
 
                     this.moverGrua(desplX);
-                    this.moverBloqueGenerado(desplX);
+                    this.moverFiguraGenerada(desplX);
                 }
 
                 else {
                     desplX = limiteDerecha - this.spriteGrua.x;
 
                     this.moverGrua(desplX);
-                    this.moverBloqueGenerado(desplX);
+                    this.moverFiguraGenerada(desplX);
                 }
             }
 
@@ -626,84 +635,90 @@ var GameLayer = cc.Layer.extend({
 
 
         // --------------------------------------------------
-        // Colocar la grúa encima del bloque
+        // Colocar la grúa encima de la figura
         // --------------------------------------------------
 
-        else if (estadoJuego == AGARRANDO_BLOQUE_MOVER_GRUA_BLOQUE) {
-            if (this.spriteGrua.x - this.spriteGrua_velX > this.bloqueGenerado.x) {
+        else if (estadoJuego == AGARRANDO_FIGURA_MOVER_GRUA_A_FIGURA) {
+            if (this.spriteGrua.x - this.spriteGrua_velX > this.figuraGenerada.x) {
                 this.moverGrua(-this.spriteGrua_velX);
             }
 
             else {
-                this.moverGrua(this.bloqueGenerado.x - this.spriteGrua.x);
-                estadoJuego = AGARRANDO_BLOQUE_SUBIR_BLOQUE;
+                this.moverGrua(this.figuraGenerada.x - this.spriteGrua.x);
+                estadoJuego = AGARRANDO_FIGURA_SUBIR_FIGURA;
             }
         }
 
 
         // -----------------------------------
-        // Subir el bloque hasta la grúa
+        // Subir la figura hasta la grúa
         // -----------------------------------
 
-        else if(estadoJuego == AGARRANDO_BLOQUE_SUBIR_BLOQUE) {
-            var posFinalBloque = this.spriteGrua.y - this.spriteGrua.height / 2 - this.bloqueGenerado.height / 2;
+        else if(estadoJuego == AGARRANDO_FIGURA_SUBIR_FIGURA) {
+            var posFinalFigura = this.spriteGrua.y - this.spriteGrua.height / 2 - this.figuraGenerada.height / 2;
 
-            if (this.bloqueGenerado.y + this.bloqueGenerado_velSubida < posFinalBloque) {
-                this.subirBloqueGenerado(this.bloqueGenerado_velSubida);
+            if (this.figuraGenerada.y + this.figuraGenerada_velSubida < posFinalFigura) {
+                this.subirFiguraGenerada(this.figuraGenerada_velSubida);
             }
 
             else {
-                this.subirBloqueGenerado(posFinalBloque - this.bloqueGenerado.y);
+                this.subirFiguraGenerada(posFinalFigura - this.figuraGenerada.y);
 
-                estadoJuego = AGARRANDO_BLOQUE_MOVER_GRUA_CENTRO;
+                estadoJuego = AGARRANDO_FIGURA_MOVER_GRUA_CENTRO;
             }
         }
 
 
         // --------------------------------------------------
-        // Llevar la grua al centro con el bloque generado
+        // Llevar la grua al centro con la figura generada
         // --------------------------------------------------
 
-        else if (estadoJuego == AGARRANDO_BLOQUE_MOVER_GRUA_CENTRO) {
-            if (this.spriteGrua.x + this.spriteGrua_velX < cc.winSize.width * 0.5) {
-                this.moverGrua(this.spriteGrua_velX);
-                this.moverBloqueGenerado(this.spriteGrua_velX);
+        else if (estadoJuego == AGARRANDO_FIGURA_MOVER_GRUA_CENTRO) {
+            var posObjetivo = cc.winSize.width * 0.5;
+            var desplazX;
+
+            if (this.spriteGrua.x + this.spriteGrua_velX < posObjetivo) {
+                desplazX = this.spriteGrua_velX;
+
+                this.moverGrua(desplazX);
+                this.moverFiguraGenerada(desplazX);
             }
 
             else {
-                this.moverGrua(cc.winSize.width * 0.5 - this.spriteGrua.x);
-                this.moverBloqueGenerado(cc.winSize.width * 0.5 - this.spriteGrua.x);
+                desplazX = posObjetivo - this.spriteGrua.x;
 
-                estadoJuego = SOLTAR_BLOQUE;
-                this.tiempoInicialBloque = new Date().getTime();
+                this.moverGrua(desplazX);
+                this.moverFiguraGenerada(desplazX);
 
-                var controles = this.getParent().getChildByTag(idCapaControles);
-                controles.addChild(controles.indicadorTiempo);
+                estadoJuego = SOLTAR_FIGURA;
+                this.tiempoInicialFigura = new Date().getTime();
             }
         }
 
 
         // ---------------------------
-        // Eliminación de bloques
+        // Eliminación de figuras
         // ---------------------------
 
         // se buscan las formas que han caído fuera, para eliminarlas
-        for (var i = 0; i < this.formasEliminar.length; i++) {
-            var shape = this.formasEliminar[i];
+        for (var index_1 = 0; index_1 < this.formasEliminar.length; index_1++) {
+            var shape = this.formasEliminar[index_1];
 
-            for (var i = 0; i < this.arrayBloques.length; i++) {
-                if (this.arrayBloques[i].body.shapeList[0] == shape) {
+            for (var index_2 = 0; index_2 < this.arrayFiguras.length; index_2++) {
+                if (this.arrayFiguras[index_2].body.shapeList[0] == shape) {
                    this.space.removeShape(shape);
                    this.space.removeBody(shape.getBody());
 
-                   this.arrayBloques[i].removeFromParent();
-                   this.arrayBloques.splice(i, 1);
+                   this.arrayFiguras[index_2].removeFromParent();
+                   this.arrayFiguras.splice(index_2, 1);
+
+                   break;
                 }
             }
         }
 
         this.formasEliminar = [];
-    }
+    }   // Fin del método update
 
 });
 
@@ -713,6 +728,7 @@ var GameLayer = cc.Layer.extend({
 // ==========================
 
 var GameScene = cc.Scene.extend({
+
     onEnter: function() {
         this._super();
         cc.director.resume();
@@ -723,4 +739,5 @@ var GameScene = cc.Scene.extend({
         var controlesLayer = new ControlesLayer();
         this.addChild(controlesLayer, 0, idCapaControles);
     }
+
 });
